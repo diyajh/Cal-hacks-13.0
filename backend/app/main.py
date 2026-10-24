@@ -1,9 +1,10 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from uuid import uuid4
 
 from .config import load_settings
 from .agents_client import AgentsClient, AgentsUnavailableError
-from .schemas import AgentEvent, TranscriptionResponse, VoiceTurnRequest, VoiceTurnResponse
+from .schemas import TranscriptionResponse, VoiceTurnRequest, VoiceTurnResponse
 from .session_mapper import to_style_session
 from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 
@@ -36,7 +37,7 @@ async def create_style_session(request: dict[str, object]) -> dict[str, object]:
     if not prompt:
         raise HTTPException(status_code=422, detail="prompt is required")
     try:
-        result = await AgentsClient(settings).plan(prompt, "demo_user", "session_live")
+        result = await AgentsClient(settings).plan(prompt, "demo_user", f"session_{uuid4().hex[:10]}")
     except AgentsUnavailableError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
     return to_style_session(result)
@@ -61,8 +62,18 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
 
     gateway = CartesiaVoiceGateway(settings)
     try:
-        speech = await gateway.synthesize(request.transcript)
+        plan = await AgentsClient(settings).plan(
+            request.transcript, "demo_user", session_id
+        )
+        recommendation = plan.get("final_recommendation") or {}
+        response_text = recommendation.get("message") or (
+            f"I found {len(recommendation.get('outfits') or [])} looks that match your request."
+        )
+        speech = await gateway.synthesize(str(response_text))
+        agent_events = recommendation.get("agent_events") or []
     except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except AgentsUnavailableError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
     except NotImplementedError as error:
         raise HTTPException(status_code=501, detail=str(error)) from error
@@ -70,17 +81,11 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
     return VoiceTurnResponse(
         session_id=session_id,
         transcript=request.transcript,
-        response_text="Voice turn accepted.",
+        response_text=str(response_text),
         audio_data_url=speech.audio_data_url,
         provider="cartesia",
         status="completed",
-        agent_events=[
-            AgentEvent(
-                agent="style",
-                status="started",
-                message="Voice request accepted by the style session",
-            )
-        ],
+        agent_events=agent_events,
     )
 
 

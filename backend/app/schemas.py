@@ -5,15 +5,13 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 
-AgentName = Literal["style", "search", "budget", "planner", "memory"]
-AgentStatus = Literal["started", "progress", "success", "rejected", "error"]
-
-
 class AgentEvent(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
-    agent: AgentName
-    status: AgentStatus
+    agent: str
+    status: str
     message: str
+    type: Optional[str] = None
+    timestamp: Optional[str] = None
     metadata: dict[str, object] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -29,7 +27,7 @@ class VoiceTurnResponse(BaseModel):
     response_text: str
     audio_url: Optional[str] = None
     audio_data_url: Optional[str] = None
-    agent_events: list[AgentEvent] = Field(default_factory=list)
+    agent_events: list[dict[str, object]] = Field(default_factory=list)
     provider: Literal["cartesia"]
     status: Literal["accepted", "completed"]
 
