@@ -132,13 +132,7 @@ export async function transcribeVoiceAudio(sessionId: string, audio: Blob): Prom
   return { transcript: result.transcript, model: result.model }
 }
 
-/** Mock-first loader used during parallel backend development. */
+/** The shopping gateway creates sessions through /shopping/plan; it does not expose the old read endpoint. */
 export async function loadDemoOrApiSession(): Promise<StyleSession> {
-  if (!apiConfigured) return demoSession
-  try {
-    return await getStyleSession(demoSession.session)
-  } catch {
-    // A fresh backend has no persisted demo session yet; keep the shell usable.
-    return demoSession
-  }
+  return demoSession
 }
