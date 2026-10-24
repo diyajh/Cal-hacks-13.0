@@ -77,5 +77,10 @@ export async function transcribeVoiceAudio(sessionId: string, audio: Blob): Prom
 /** Mock-first loader used during parallel backend development. */
 export async function loadDemoOrApiSession(): Promise<StyleSession> {
   if (!apiConfigured) return demoSession
-  return getStyleSession(demoSession.session)
+  try {
+    return await getStyleSession(demoSession.session)
+  } catch {
+    // A fresh backend has no persisted demo session yet; keep the shell usable.
+    return demoSession
+  }
 }

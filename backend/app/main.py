@@ -10,6 +10,7 @@ from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 
 
 settings = load_settings()
+SESSION_CACHE: dict[str, dict[str, object]] = {}
 app = FastAPI(title="Aura Voice API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
@@ -40,7 +41,17 @@ async def create_style_session(request: dict[str, object]) -> dict[str, object]:
         result = await AgentsClient(settings).plan(prompt, "demo_user", f"session_{uuid4().hex[:10]}")
     except AgentsUnavailableError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
-    return to_style_session(result)
+    session = to_style_session(result)
+    SESSION_CACHE[str(session["session"])] = session
+    return session
+
+
+@app.get("/api/style-sessions/{session_id}")
+async def get_style_session(session_id: str) -> dict[str, object]:
+    session = SESSION_CACHE.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="style session not found")
+    return session
 
 
 @app.post("/api/style-sessions/{session_id}/modifications")
@@ -52,7 +63,9 @@ async def modify_style_session(session_id: str, request: dict[str, object]) -> d
         result = await AgentsClient(settings).modify(session_id, "demo_user", instruction)
     except AgentsUnavailableError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
-    return to_style_session(result)
+    session = to_style_session(result)
+    SESSION_CACHE[session_id] = session
+    return session
 
 
 @app.post("/api/voice-sessions/{session_id}/turns", response_model=VoiceTurnResponse)
