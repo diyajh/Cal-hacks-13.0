@@ -1,0 +1,56 @@
+{
+  "session_id": "session_demo",
+  "user_id": "user_123",
+  "raw_request": "I'm going to San Diego for five days. I need five outfits. Each outfit should be under $50 and my total budget is $500. I want a beachy neutral aesthetic. One outfit needs a crochet top and skirt. I like beige and white. I don't like neon colors. I already own white sneakers. Remember that I own them.",
+  "location": "San Diego",
+  "duration_days": 5,
+  "number_of_outfits": 5,
+  "occasions": [
+    "beach",
+    "brunch",
+    "sightseeing",
+    "dinner"
+  ],
+  "styles": [
+    "beachy",
+    "coastal"
+  ],
+  "preferred_colors": [
+    "neutral",
+    "beige",
+    "white"
+  ],
+  "avoid": [
+    "neon"
+  ],
+  "required_items": [
+    {
+      "item": "crochet top",
+      "quantity": 1,
+      "required_for_outfit": null
+    },
+    {
+      "item": "skirt",
+      "quantity": 1,
+      "required_for_outfit": null
+    }
+  ],
+  "per_outfit_budget": 50.0,
+  "total_budget": 500.0,
+  "currency": "USD",
+  "owned_item_references": [
+    "wardrobe_white_sneakers"
+  ],
+  "additional_preferences": [],
+  "hard_constraints": [
+    "per_outfit_budget",
+    "total_budget",
+    "number_of_outfits",
+    "required_items"
+  ],
+  "soft_preferences": [
+    "styles",
+    "preferred_colors",
+    "occasions"
+  ]
+}

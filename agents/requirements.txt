@@ -1,0 +1,5 @@
+# agents/core has NO third-party dependencies (stdlib only) — FastAPI can import it directly.
+# Only the Fetch.ai layer (agents/fetch) needs uagents.
+# Works on Python 3.9 (older uagents) and 3.10+ (latest uagents). Verified running on Python 3.9.6.
+# Uses only Agent, Bureau, Model, on_message, on_rest_post/on_rest_get and ctx.send.
+uagents

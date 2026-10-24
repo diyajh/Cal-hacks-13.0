@@ -1,0 +1,811 @@
+[
+  {
+    "id": "mock_prod_001",
+    "name": "Ivory Crochet Halter Top",
+    "category": "top",
+    "subcategory": "crochet_top",
+    "price": 38.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Hand-crochet halter top with open-knit detail.",
+    "colors": [
+      "ivory"
+    ],
+    "tags": [
+      "crochet",
+      "beach",
+      "boho",
+      "summer",
+      "coastal",
+      "resort"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_001"
+  },
+  {
+    "id": "mock_prod_002",
+    "name": "Beige Crochet Tank",
+    "category": "top",
+    "subcategory": "crochet_top",
+    "price": 18.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Relaxed crochet tank in a sandy beige.",
+    "colors": [
+      "beige"
+    ],
+    "tags": [
+      "crochet",
+      "beach",
+      "summer",
+      "boho"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_002"
+  },
+  {
+    "id": "mock_prod_003",
+    "name": "White Crochet Crop Top",
+    "category": "top",
+    "subcategory": "crochet_top",
+    "price": 24.5,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Cropped crochet top with scalloped hem.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "crochet",
+      "crop",
+      "beach",
+      "summer"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_003"
+  },
+  {
+    "id": "mock_prod_004",
+    "name": "Natural Linen Button-Down Shirt",
+    "category": "top",
+    "subcategory": "shirt",
+    "price": 29.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Oversized linen shirt, great as a cover-up.",
+    "colors": [
+      "natural",
+      "beige"
+    ],
+    "tags": [
+      "linen",
+      "coastal",
+      "beach",
+      "casual",
+      "summer"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_004"
+  },
+  {
+    "id": "mock_prod_005",
+    "name": "White Ribbed Tank Top",
+    "category": "top",
+    "subcategory": "tank",
+    "price": 12.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Everyday ribbed cotton tank.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "basic",
+      "minimal",
+      "casual",
+      "summer"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_005"
+  },
+  {
+    "id": "mock_prod_006",
+    "name": "Cream Linen Cami",
+    "category": "top",
+    "subcategory": "cami",
+    "price": 22.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Linen-blend camisole with adjustable straps.",
+    "colors": [
+      "cream"
+    ],
+    "tags": [
+      "linen",
+      "summer",
+      "brunch",
+      "chic",
+      "coastal"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_006"
+  },
+  {
+    "id": "mock_prod_007",
+    "name": "Sand Gauze Peasant Blouse",
+    "category": "top",
+    "subcategory": "blouse",
+    "price": 26.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Lightweight cotton gauze blouse.",
+    "colors": [
+      "sand"
+    ],
+    "tags": [
+      "boho",
+      "breezy",
+      "summer",
+      "brunch"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_007"
+  },
+  {
+    "id": "mock_prod_008",
+    "name": "Black Satin Cami",
+    "category": "top",
+    "subcategory": "cami",
+    "price": 27.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Bias-cut satin cami for nights out.",
+    "colors": [
+      "black"
+    ],
+    "tags": [
+      "satin",
+      "evening",
+      "dinner",
+      "elegant",
+      "chic"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_008"
+  },
+  {
+    "id": "mock_prod_009",
+    "name": "Neon Green Graphic Tee",
+    "category": "top",
+    "subcategory": "tee",
+    "price": 15.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Bright neon graphic tee.",
+    "colors": [
+      "neon green"
+    ],
+    "tags": [
+      "neon",
+      "graphic",
+      "streetwear"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_009"
+  },
+  {
+    "id": "mock_prod_010",
+    "name": "Striped Navy Tee",
+    "category": "top",
+    "subcategory": "tee",
+    "price": 16.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Classic striped boat-neck tee.",
+    "colors": [
+      "navy",
+      "white"
+    ],
+    "tags": [
+      "nautical",
+      "coastal",
+      "casual",
+      "striped"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_010"
+  },
+  {
+    "id": "mock_prod_011",
+    "name": "Taupe Knit Polo",
+    "category": "top",
+    "subcategory": "polo",
+    "price": 31.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Short-sleeve knit polo.",
+    "colors": [
+      "taupe"
+    ],
+    "tags": [
+      "knit",
+      "classic",
+      "preppy",
+      "brunch"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_011"
+  },
+  {
+    "id": "mock_prod_012",
+    "name": "Beige Linen Maxi Skirt",
+    "category": "bottom",
+    "subcategory": "skirt",
+    "price": 29.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Flowy linen maxi skirt with elastic waist.",
+    "colors": [
+      "beige"
+    ],
+    "tags": [
+      "linen",
+      "beach",
+      "coastal",
+      "summer",
+      "resort",
+      "flowy"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_012"
+  },
+  {
+    "id": "mock_prod_013",
+    "name": "White Cotton Mini Skirt",
+    "category": "bottom",
+    "subcategory": "skirt",
+    "price": 16.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "A-line cotton mini skirt.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "cotton",
+      "summer",
+      "casual",
+      "beach"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_013"
+  },
+  {
+    "id": "mock_prod_014",
+    "name": "Sand Gauze Midi Skirt",
+    "category": "bottom",
+    "subcategory": "skirt",
+    "price": 21.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Tiered gauze midi skirt.",
+    "colors": [
+      "sand"
+    ],
+    "tags": [
+      "boho",
+      "breezy",
+      "beach",
+      "summer"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_014"
+  },
+  {
+    "id": "mock_prod_015",
+    "name": "Champagne Satin Midi Skirt",
+    "category": "bottom",
+    "subcategory": "skirt",
+    "price": 34.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Bias-cut satin slip skirt.",
+    "colors": [
+      "champagne"
+    ],
+    "tags": [
+      "satin",
+      "elegant",
+      "evening",
+      "dinner",
+      "midi"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_015"
+  },
+  {
+    "id": "mock_prod_016",
+    "name": "Cream Linen Shorts",
+    "category": "bottom",
+    "subcategory": "shorts",
+    "price": 19.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "High-waisted linen shorts.",
+    "colors": [
+      "cream"
+    ],
+    "tags": [
+      "linen",
+      "beach",
+      "summer",
+      "casual",
+      "coastal"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_016"
+  },
+  {
+    "id": "mock_prod_017",
+    "name": "Khaki Wide-Leg Trousers",
+    "category": "bottom",
+    "subcategory": "pants",
+    "price": 33.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Breezy wide-leg trousers.",
+    "colors": [
+      "khaki"
+    ],
+    "tags": [
+      "classic",
+      "tailored",
+      "polished",
+      "brunch"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_017"
+  },
+  {
+    "id": "mock_prod_018",
+    "name": "Light Wash Denim Shorts",
+    "category": "bottom",
+    "subcategory": "shorts",
+    "price": 22.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Relaxed denim shorts.",
+    "colors": [
+      "light blue"
+    ],
+    "tags": [
+      "denim",
+      "casual",
+      "summer",
+      "sightseeing"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_018"
+  },
+  {
+    "id": "mock_prod_019",
+    "name": "Hot Pink Neon Bike Shorts",
+    "category": "bottom",
+    "subcategory": "shorts",
+    "price": 14.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Neon bike shorts.",
+    "colors": [
+      "neon pink"
+    ],
+    "tags": [
+      "neon",
+      "sporty",
+      "athletic"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_019"
+  },
+  {
+    "id": "mock_prod_020",
+    "name": "White Linen Pants",
+    "category": "bottom",
+    "subcategory": "pants",
+    "price": 27.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Drawstring linen pants.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "linen",
+      "coastal",
+      "resort",
+      "summer",
+      "comfortable"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_020"
+  },
+  {
+    "id": "mock_prod_021",
+    "name": "Champagne Satin Slip Midi Dress",
+    "category": "dress",
+    "subcategory": "slip_dress",
+    "price": 42.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Bias-cut satin slip dress.",
+    "colors": [
+      "champagne"
+    ],
+    "tags": [
+      "satin",
+      "elegant",
+      "evening",
+      "dinner",
+      "midi",
+      "date"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_021"
+  },
+  {
+    "id": "mock_prod_022",
+    "name": "White Linen Sundress",
+    "category": "dress",
+    "subcategory": "sundress",
+    "price": 36.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Square-neck linen sundress.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "linen",
+      "summer",
+      "beach",
+      "brunch",
+      "coastal"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_022"
+  },
+  {
+    "id": "mock_prod_023",
+    "name": "Beige Crochet Cover-Up Dress",
+    "category": "dress",
+    "subcategory": "crochet_dress",
+    "price": 34.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Open-knit crochet beach dress.",
+    "colors": [
+      "beige"
+    ],
+    "tags": [
+      "crochet",
+      "beach",
+      "boho",
+      "resort"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_023"
+  },
+  {
+    "id": "mock_prod_024",
+    "name": "Black Wrap Midi Dress",
+    "category": "dress",
+    "subcategory": "wrap_dress",
+    "price": 39.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Wrap midi dress with flutter sleeves.",
+    "colors": [
+      "black"
+    ],
+    "tags": [
+      "elegant",
+      "dinner",
+      "evening",
+      "classic",
+      "wrap"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_024"
+  },
+  {
+    "id": "mock_prod_025",
+    "name": "Neon Yellow Bodycon Dress",
+    "category": "dress",
+    "subcategory": "bodycon_dress",
+    "price": 28.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Neon bodycon party dress.",
+    "colors": [
+      "neon yellow"
+    ],
+    "tags": [
+      "neon",
+      "party",
+      "night"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_025"
+  },
+  {
+    "id": "mock_prod_026",
+    "name": "Tan Leather Slide Sandals",
+    "category": "shoes",
+    "subcategory": "sandals",
+    "price": 24.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Minimal leather slides.",
+    "colors": [
+      "tan"
+    ],
+    "tags": [
+      "leather",
+      "beach",
+      "summer",
+      "casual",
+      "coastal"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_026"
+  },
+  {
+    "id": "mock_prod_027",
+    "name": "Natural Jute Espadrilles",
+    "category": "shoes",
+    "subcategory": "espadrilles",
+    "price": 28.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Classic jute espadrilles.",
+    "colors": [
+      "natural",
+      "beige"
+    ],
+    "tags": [
+      "woven",
+      "summer",
+      "brunch",
+      "resort",
+      "coastal"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_027"
+  },
+  {
+    "id": "mock_prod_028",
+    "name": "Nude Strappy Block Heels",
+    "category": "shoes",
+    "subcategory": "heels",
+    "price": 32.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Comfortable strappy block heels.",
+    "colors": [
+      "nude"
+    ],
+    "tags": [
+      "elegant",
+      "dinner",
+      "evening",
+      "heels",
+      "strappy"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_028"
+  },
+  {
+    "id": "mock_prod_029",
+    "name": "White Platform Sneakers",
+    "category": "shoes",
+    "subcategory": "sneakers",
+    "price": 45.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Chunky platform sneakers.",
+    "colors": [
+      "white"
+    ],
+    "tags": [
+      "casual",
+      "comfortable",
+      "sneakers",
+      "streetwear"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_029"
+  },
+  {
+    "id": "mock_prod_030",
+    "name": "Gold Flat Sandals",
+    "category": "shoes",
+    "subcategory": "sandals",
+    "price": 19.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Thin-strap metallic flat sandals.",
+    "colors": [
+      "gold"
+    ],
+    "tags": [
+      "evening",
+      "summer",
+      "dinner",
+      "elegant"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_030"
+  },
+  {
+    "id": "mock_prod_031",
+    "name": "Neon Orange Running Shoes",
+    "category": "shoes",
+    "subcategory": "sneakers",
+    "price": 40.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Neon running shoes.",
+    "colors": [
+      "neon orange"
+    ],
+    "tags": [
+      "neon",
+      "athletic",
+      "sporty"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_031"
+  },
+  {
+    "id": "mock_prod_032",
+    "name": "Cream Woven Flip Flops",
+    "category": "shoes",
+    "subcategory": "sandals",
+    "price": 12.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Woven-strap flip flops.",
+    "colors": [
+      "cream"
+    ],
+    "tags": [
+      "beach",
+      "summer",
+      "woven",
+      "casual"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_032"
+  },
+  {
+    "id": "mock_prod_033",
+    "name": "Ivory Pleated Satin Midi Skirt",
+    "category": "bottom",
+    "subcategory": "skirt",
+    "price": 20.0,
+    "currency": "USD",
+    "retailer": "Mock Retailer",
+    "image_url": null,
+    "product_url": null,
+    "description": "Softly pleated satin midi skirt that dresses up any top.",
+    "colors": [
+      "ivory"
+    ],
+    "tags": [
+      "satin",
+      "elegant",
+      "midi",
+      "dinner",
+      "chic"
+    ],
+    "available": true,
+    "source": "mock",
+    "source_id": "mock_033"
+  }
+]

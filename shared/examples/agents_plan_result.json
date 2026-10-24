@@ -1,0 +1,1646 @@
+{
+  "final_recommendation": {
+    "session_id": "session_demo",
+    "status": "completed",
+    "parsed_request": {
+      "session_id": "session_demo",
+      "user_id": "user_123",
+      "raw_request": "I'm going to San Diego for five days. I need five outfits. Each outfit should be under $50 and my total budget is $500. I want a beachy neutral aesthetic. One outfit needs a crochet top and skirt. I like beige and white. I don't like neon colors. I already own white sneakers. Remember that I own them.",
+      "location": "San Diego",
+      "duration_days": 5,
+      "number_of_outfits": 5,
+      "occasions": [
+        "beach",
+        "brunch",
+        "sightseeing",
+        "dinner"
+      ],
+      "styles": [
+        "beachy",
+        "coastal"
+      ],
+      "preferred_colors": [
+        "neutral",
+        "beige",
+        "white"
+      ],
+      "avoid": [
+        "neon"
+      ],
+      "required_items": [
+        {
+          "item": "crochet top",
+          "quantity": 1,
+          "required_for_outfit": null
+        },
+        {
+          "item": "skirt",
+          "quantity": 1,
+          "required_for_outfit": null
+        }
+      ],
+      "per_outfit_budget": 50.0,
+      "total_budget": 500.0,
+      "currency": "USD",
+      "owned_item_references": [
+        "wardrobe_white_sneakers"
+      ],
+      "additional_preferences": [],
+      "hard_constraints": [
+        "per_outfit_budget",
+        "total_budget",
+        "number_of_outfits",
+        "required_items"
+      ],
+      "soft_preferences": [
+        "styles",
+        "preferred_colors",
+        "occasions"
+      ]
+    },
+    "outfits": [
+      {
+        "id": "outfit_1",
+        "title": "Beachy Beach Day",
+        "day": 1,
+        "occasion": "beach",
+        "match_score": 88,
+        "score_breakdown": {
+          "style": 83,
+          "color": 100,
+          "occasion": 85,
+          "budget": 100,
+          "preference": 75
+        },
+        "items": [
+          {
+            "id": "outfit_item_1",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_002",
+              "name": "Beige Crochet Tank",
+              "category": "top",
+              "subcategory": "crochet_top",
+              "price": 18.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Relaxed crochet tank in a sandy beige.",
+              "colors": [
+                "beige"
+              ],
+              "tags": [
+                "crochet",
+                "beach",
+                "summer",
+                "boho"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_002"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_5"
+            ]
+          },
+          {
+            "id": "outfit_item_2",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_014",
+              "name": "Sand Gauze Midi Skirt",
+              "category": "bottom",
+              "subcategory": "skirt",
+              "price": 21.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Tiered gauze midi skirt.",
+              "colors": [
+                "sand"
+              ],
+              "tags": [
+                "boho",
+                "breezy",
+                "beach",
+                "summer"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_014"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_3"
+            ]
+          },
+          {
+            "id": "outfit_item_6",
+            "source_type": "wardrobe",
+            "product": null,
+            "wardrobe_item": {
+              "id": "wardrobe_white_sneakers",
+              "user_id": "user_123",
+              "name": "White Sneakers",
+              "category": "shoes",
+              "subcategory": "sneakers",
+              "colors": [
+                "white"
+              ],
+              "tags": [],
+              "image_url": null,
+              "estimated_value": null,
+              "memory_type": "remembered",
+              "created_at": "2026-10-24T05:05:55Z",
+              "expires_at": null
+            },
+            "purchase_required": false,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_2",
+              "outfit_3",
+              "outfit_4"
+            ]
+          }
+        ],
+        "total_value": 39.0,
+        "new_purchase_cost": 39.0,
+        "why_it_works": "Built for beach with the beachy and coastal look you asked for \u2014 beach, boho and breezy details carry the vibe. It stays in your beige, sand and white palette. Includes your requested crochet top and skirt. Your own White Sneakers completes it at no extra cost. Beige Crochet Tank and Sand Gauze Midi Skirt are reused in other outfits, so you only buy them once. New purchases: $39.00 of your $50.00 per-outfit budget.",
+        "constraints_satisfied": true
+      },
+      {
+        "id": "outfit_2",
+        "title": "Coastal Brunch",
+        "day": 2,
+        "occasion": "brunch",
+        "match_score": 84,
+        "score_breakdown": {
+          "style": 72,
+          "color": 100,
+          "occasion": 80,
+          "budget": 100,
+          "preference": 75
+        },
+        "items": [
+          {
+            "id": "outfit_item_9",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_005",
+              "name": "White Ribbed Tank Top",
+              "category": "top",
+              "subcategory": "tank",
+              "price": 12.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Everyday ribbed cotton tank.",
+              "colors": [
+                "white"
+              ],
+              "tags": [
+                "basic",
+                "minimal",
+                "casual",
+                "summer"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_005"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": false,
+            "used_in_outfits": [
+              "outfit_2"
+            ]
+          },
+          {
+            "id": "outfit_item_5",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_016",
+              "name": "Cream Linen Shorts",
+              "category": "bottom",
+              "subcategory": "shorts",
+              "price": 19.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "High-waisted linen shorts.",
+              "colors": [
+                "cream"
+              ],
+              "tags": [
+                "linen",
+                "beach",
+                "summer",
+                "casual",
+                "coastal"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_016"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_2",
+              "outfit_5"
+            ]
+          },
+          {
+            "id": "outfit_item_6",
+            "source_type": "wardrobe",
+            "product": null,
+            "wardrobe_item": {
+              "id": "wardrobe_white_sneakers",
+              "user_id": "user_123",
+              "name": "White Sneakers",
+              "category": "shoes",
+              "subcategory": "sneakers",
+              "colors": [
+                "white"
+              ],
+              "tags": [],
+              "image_url": null,
+              "estimated_value": null,
+              "memory_type": "remembered",
+              "created_at": "2026-10-24T05:05:55Z",
+              "expires_at": null
+            },
+            "purchase_required": false,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_2",
+              "outfit_3",
+              "outfit_4"
+            ]
+          }
+        ],
+        "total_value": 31.0,
+        "new_purchase_cost": 31.0,
+        "why_it_works": "Built for brunch with the beachy and coastal look you asked for \u2014 beach, coastal and linen details carry the vibe. It stays in your cream and white palette. Your own White Sneakers completes it at no extra cost. Cream Linen Shorts is reused in other outfits, so you only buy it once. New purchases: $31.00 of your $50.00 per-outfit budget.",
+        "constraints_satisfied": true
+      },
+      {
+        "id": "outfit_3",
+        "title": "Beachy Sightseeing Day",
+        "day": 3,
+        "occasion": "sightseeing",
+        "match_score": 84,
+        "score_breakdown": {
+          "style": 83,
+          "color": 100,
+          "occasion": 65,
+          "budget": 100,
+          "preference": 75
+        },
+        "items": [
+          {
+            "id": "outfit_item_4",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_004",
+              "name": "Natural Linen Button-Down Shirt",
+              "category": "top",
+              "subcategory": "shirt",
+              "price": 29.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Oversized linen shirt, great as a cover-up.",
+              "colors": [
+                "natural",
+                "beige"
+              ],
+              "tags": [
+                "linen",
+                "coastal",
+                "beach",
+                "casual",
+                "summer"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_004"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": false,
+            "used_in_outfits": [
+              "outfit_3"
+            ]
+          },
+          {
+            "id": "outfit_item_2",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_014",
+              "name": "Sand Gauze Midi Skirt",
+              "category": "bottom",
+              "subcategory": "skirt",
+              "price": 21.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Tiered gauze midi skirt.",
+              "colors": [
+                "sand"
+              ],
+              "tags": [
+                "boho",
+                "breezy",
+                "beach",
+                "summer"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_014"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_3"
+            ]
+          },
+          {
+            "id": "outfit_item_6",
+            "source_type": "wardrobe",
+            "product": null,
+            "wardrobe_item": {
+              "id": "wardrobe_white_sneakers",
+              "user_id": "user_123",
+              "name": "White Sneakers",
+              "category": "shoes",
+              "subcategory": "sneakers",
+              "colors": [
+                "white"
+              ],
+              "tags": [],
+              "image_url": null,
+              "estimated_value": null,
+              "memory_type": "remembered",
+              "created_at": "2026-10-24T05:05:55Z",
+              "expires_at": null
+            },
+            "purchase_required": false,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_2",
+              "outfit_3",
+              "outfit_4"
+            ]
+          }
+        ],
+        "total_value": 50.0,
+        "new_purchase_cost": 50.0,
+        "why_it_works": "Built for sightseeing with the beachy and coastal look you asked for \u2014 beach, boho and breezy details carry the vibe. It stays in your beige, natural and sand palette. Your own White Sneakers completes it at no extra cost. Sand Gauze Midi Skirt is reused in other outfits, so you only buy it once. New purchases: $50.00 of your $50.00 per-outfit budget.",
+        "constraints_satisfied": true
+      },
+      {
+        "id": "outfit_4",
+        "title": "Coastal Dinner Out",
+        "day": 4,
+        "occasion": "dinner",
+        "match_score": 77,
+        "score_breakdown": {
+          "style": 50,
+          "color": 100,
+          "occasion": 78,
+          "budget": 100,
+          "preference": 75
+        },
+        "items": [
+          {
+            "id": "outfit_item_7",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_024",
+              "name": "Black Wrap Midi Dress",
+              "category": "dress",
+              "subcategory": "wrap_dress",
+              "price": 39.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Wrap midi dress with flutter sleeves.",
+              "colors": [
+                "black"
+              ],
+              "tags": [
+                "elegant",
+                "dinner",
+                "evening",
+                "classic",
+                "wrap"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_024"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": false,
+            "used_in_outfits": [
+              "outfit_4"
+            ]
+          },
+          {
+            "id": "outfit_item_6",
+            "source_type": "wardrobe",
+            "product": null,
+            "wardrobe_item": {
+              "id": "wardrobe_white_sneakers",
+              "user_id": "user_123",
+              "name": "White Sneakers",
+              "category": "shoes",
+              "subcategory": "sneakers",
+              "colors": [
+                "white"
+              ],
+              "tags": [],
+              "image_url": null,
+              "estimated_value": null,
+              "memory_type": "remembered",
+              "created_at": "2026-10-24T05:05:55Z",
+              "expires_at": null
+            },
+            "purchase_required": false,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_2",
+              "outfit_3",
+              "outfit_4"
+            ]
+          }
+        ],
+        "total_value": 39.0,
+        "new_purchase_cost": 39.0,
+        "why_it_works": "Built for dinner with the beachy and coastal look you asked for. It stays in your black and white palette. Your own White Sneakers completes it at no extra cost. New purchases: $39.00 of your $50.00 per-outfit budget.",
+        "constraints_satisfied": true
+      },
+      {
+        "id": "outfit_5",
+        "title": "Beachy Beach Day",
+        "day": 5,
+        "occasion": "beach",
+        "match_score": 94,
+        "score_breakdown": {
+          "style": 93,
+          "color": 100,
+          "occasion": 100,
+          "budget": 100,
+          "preference": 75
+        },
+        "items": [
+          {
+            "id": "outfit_item_1",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_002",
+              "name": "Beige Crochet Tank",
+              "category": "top",
+              "subcategory": "crochet_top",
+              "price": 18.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Relaxed crochet tank in a sandy beige.",
+              "colors": [
+                "beige"
+              ],
+              "tags": [
+                "crochet",
+                "beach",
+                "summer",
+                "boho"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_002"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_1",
+              "outfit_5"
+            ]
+          },
+          {
+            "id": "outfit_item_5",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_016",
+              "name": "Cream Linen Shorts",
+              "category": "bottom",
+              "subcategory": "shorts",
+              "price": 19.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "High-waisted linen shorts.",
+              "colors": [
+                "cream"
+              ],
+              "tags": [
+                "linen",
+                "beach",
+                "summer",
+                "casual",
+                "coastal"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_016"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": true,
+            "used_in_outfits": [
+              "outfit_2",
+              "outfit_5"
+            ]
+          },
+          {
+            "id": "outfit_item_10",
+            "source_type": "product",
+            "product": {
+              "id": "mock_prod_032",
+              "name": "Cream Woven Flip Flops",
+              "category": "shoes",
+              "subcategory": "sandals",
+              "price": 12.0,
+              "currency": "USD",
+              "retailer": "Mock Retailer",
+              "image_url": null,
+              "product_url": null,
+              "description": "Woven-strap flip flops.",
+              "colors": [
+                "cream"
+              ],
+              "tags": [
+                "beach",
+                "summer",
+                "woven",
+                "casual"
+              ],
+              "available": true,
+              "source": "mock",
+              "source_id": "mock_032"
+            },
+            "wardrobe_item": null,
+            "purchase_required": true,
+            "reused": false,
+            "used_in_outfits": [
+              "outfit_5"
+            ]
+          }
+        ],
+        "total_value": 49.0,
+        "new_purchase_cost": 49.0,
+        "why_it_works": "Built for beach with the beachy and coastal look you asked for \u2014 beach, boho and coastal details carry the vibe. It stays in your beige and cream palette. Beige Crochet Tank and Cream Linen Shorts are reused in other outfits, so you only buy them once. New purchases: $49.00 of your $50.00 per-outfit budget.",
+        "constraints_satisfied": true
+      }
+    ],
+    "total_new_purchase_cost": 150.0,
+    "total_budget": 500.0,
+    "owned_items_used": [
+      {
+        "id": "outfit_item_6",
+        "source_type": "wardrobe",
+        "product": null,
+        "wardrobe_item": {
+          "id": "wardrobe_white_sneakers",
+          "user_id": "user_123",
+          "name": "White Sneakers",
+          "category": "shoes",
+          "subcategory": "sneakers",
+          "colors": [
+            "white"
+          ],
+          "tags": [],
+          "image_url": null,
+          "estimated_value": null,
+          "memory_type": "remembered",
+          "created_at": "2026-10-24T05:05:55Z",
+          "expires_at": null
+        },
+        "purchase_required": false,
+        "reused": true,
+        "used_in_outfits": [
+          "outfit_1",
+          "outfit_2",
+          "outfit_3",
+          "outfit_4"
+        ]
+      }
+    ],
+    "reused_items": [
+      {
+        "id": "outfit_item_1",
+        "source_type": "product",
+        "product": {
+          "id": "mock_prod_002",
+          "name": "Beige Crochet Tank",
+          "category": "top",
+          "subcategory": "crochet_top",
+          "price": 18.0,
+          "currency": "USD",
+          "retailer": "Mock Retailer",
+          "image_url": null,
+          "product_url": null,
+          "description": "Relaxed crochet tank in a sandy beige.",
+          "colors": [
+            "beige"
+          ],
+          "tags": [
+            "crochet",
+            "beach",
+            "summer",
+            "boho"
+          ],
+          "available": true,
+          "source": "mock",
+          "source_id": "mock_002"
+        },
+        "wardrobe_item": null,
+        "purchase_required": true,
+        "reused": true,
+        "used_in_outfits": [
+          "outfit_1",
+          "outfit_5"
+        ]
+      },
+      {
+        "id": "outfit_item_2",
+        "source_type": "product",
+        "product": {
+          "id": "mock_prod_014",
+          "name": "Sand Gauze Midi Skirt",
+          "category": "bottom",
+          "subcategory": "skirt",
+          "price": 21.0,
+          "currency": "USD",
+          "retailer": "Mock Retailer",
+          "image_url": null,
+          "product_url": null,
+          "description": "Tiered gauze midi skirt.",
+          "colors": [
+            "sand"
+          ],
+          "tags": [
+            "boho",
+            "breezy",
+            "beach",
+            "summer"
+          ],
+          "available": true,
+          "source": "mock",
+          "source_id": "mock_014"
+        },
+        "wardrobe_item": null,
+        "purchase_required": true,
+        "reused": true,
+        "used_in_outfits": [
+          "outfit_1",
+          "outfit_3"
+        ]
+      },
+      {
+        "id": "outfit_item_6",
+        "source_type": "wardrobe",
+        "product": null,
+        "wardrobe_item": {
+          "id": "wardrobe_white_sneakers",
+          "user_id": "user_123",
+          "name": "White Sneakers",
+          "category": "shoes",
+          "subcategory": "sneakers",
+          "colors": [
+            "white"
+          ],
+          "tags": [],
+          "image_url": null,
+          "estimated_value": null,
+          "memory_type": "remembered",
+          "created_at": "2026-10-24T05:05:55Z",
+          "expires_at": null
+        },
+        "purchase_required": false,
+        "reused": true,
+        "used_in_outfits": [
+          "outfit_1",
+          "outfit_2",
+          "outfit_3",
+          "outfit_4"
+        ]
+      },
+      {
+        "id": "outfit_item_5",
+        "source_type": "product",
+        "product": {
+          "id": "mock_prod_016",
+          "name": "Cream Linen Shorts",
+          "category": "bottom",
+          "subcategory": "shorts",
+          "price": 19.0,
+          "currency": "USD",
+          "retailer": "Mock Retailer",
+          "image_url": null,
+          "product_url": null,
+          "description": "High-waisted linen shorts.",
+          "colors": [
+            "cream"
+          ],
+          "tags": [
+            "linen",
+            "beach",
+            "summer",
+            "casual",
+            "coastal"
+          ],
+          "available": true,
+          "source": "mock",
+          "source_id": "mock_016"
+        },
+        "wardrobe_item": null,
+        "purchase_required": true,
+        "reused": true,
+        "used_in_outfits": [
+          "outfit_2",
+          "outfit_5"
+        ]
+      }
+    ],
+    "agent_events": [
+      {
+        "id": "event_27f38fdf",
+        "session_id": "session_demo",
+        "agent": "orchestrator",
+        "type": "mode",
+        "status": "completed",
+        "message": "Running agents in-process (local mode, Fetch.ai network not used).",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_5918c93c",
+        "session_id": "session_demo",
+        "agent": "orchestrator",
+        "type": "request_received",
+        "status": "working",
+        "message": "Understanding your request\u2026",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_83b322bb",
+        "session_id": "session_demo",
+        "agent": "orchestrator",
+        "type": "request_parsed",
+        "status": "completed",
+        "message": "Parsed: 5 outfits; for San Diego; \u2264 $50.00/outfit; \u2264 $500.00 total; style: beachy, coastal; must include: crochet top, skirt; avoid: neon; owned: wardrobe_white_sneakers",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_57405434",
+        "session_id": "session_demo",
+        "agent": "orchestrator",
+        "type": "memory",
+        "status": "completed",
+        "message": "Noted that you own White Sneakers (remembered).",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_421d49be",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "planning",
+        "status": "working",
+        "message": "Planning 5 outfits: Day 1 beach, Day 2 brunch, Day 3 sightseeing, Day 4 dinner, Day 5 beach",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_f0161830",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for elegant heels under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_d2508c45",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 7 products for 'elegant heels' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_8942d34d",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy crochet top under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_1d8e39e6",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 11 products for 'beachy crochet top' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_1552c85e",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy sandals under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_de07f809",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 7 products for 'beachy sandals' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_b11710b2",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy dress under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_2c0a66d0",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 5 products for 'beachy dress' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_0336552e",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy top under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_0afeb03c",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 11 products for 'beachy top' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_88c56667",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy skirt under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_6916c4da",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 10 products for 'beachy skirt' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_556f2be4",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy skirt shorts under $50.00 (initial search)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_097b4a57",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 10 products for 'beachy skirt shorts' from fallback catalog",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_cbc2c968",
+        "session_id": "session_demo",
+        "agent": "style_agent",
+        "type": "style_evaluated",
+        "status": "completed",
+        "message": "Evaluated 34 products against your style profile; excluded 4 with avoided colors/styles. Top pick: Beige Crochet Tank (96/100)",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_95ab8d87",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_created",
+        "status": "completed",
+        "message": "Created Outfit 1 (Day 1, beach): Beige Crochet Tank $18.00 + Sand Gauze Midi Skirt $21.00 + Tan Leather Slide Sandals $24.00 \u2014 new purchases $63.00",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a84146e4",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_created",
+        "status": "completed",
+        "message": "Created Outfit 2 (Day 2, brunch): Natural Linen Button-Down Shirt $29.00 + Cream Linen Shorts $19.00 + Tan Leather Slide Sandals $24.00 \u2014 new purchases $72.00",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_242aa8b5",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_created",
+        "status": "completed",
+        "message": "Created Outfit 3 (Day 3, sightseeing): Natural Linen Button-Down Shirt $29.00 + Sand Gauze Midi Skirt $21.00 + your White Sneakers \u2014 new purchases $50.00",
+        "outfit_id": "outfit_3",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_d174178d",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_created",
+        "status": "completed",
+        "message": "Created Outfit 4 (Day 4, dinner): Black Wrap Midi Dress $39.00 + Tan Leather Slide Sandals $24.00 \u2014 new purchases $63.00",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_18c9c411",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_created",
+        "status": "completed",
+        "message": "Created Outfit 5 (Day 5, beach): Beige Crochet Tank $18.00 + Cream Linen Shorts $19.00 + Natural Jute Espadrilles $28.00 \u2014 new purchases $65.00",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a5ea9007",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_violation",
+        "status": "completed",
+        "message": "Rejected outfit 1: $63.00 exceeds the $50.00 limit.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_12150ffe",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_violation",
+        "status": "completed",
+        "message": "Rejected outfit 2: $72.00 exceeds the $50.00 limit.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_d557de17",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 3: $50.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_3",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_423b8820",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_violation",
+        "status": "completed",
+        "message": "Rejected outfit 4: $63.00 exceeds the $50.00 limit.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_ad2f1c6d",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_violation",
+        "status": "completed",
+        "message": "Rejected outfit 5: $65.00 exceeds the $50.00 limit.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_c87591f9",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Trip total $178.00 (each item counted once) is within the $500.00 budget.",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_35f390f4",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replanning Outfit 1 (attempt 1/3): $63.00 is $13.00 over the $50.00 limit.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_0f8d5505",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Tan Leather Slide Sandals ($24.00) in Outfit 1 to bring Outfit 1 under budget; requesting shoes under $11.00.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_b7d5b849",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy sandals under $11.00 (replacement search)",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_4542a2cc",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 0 products for 'beachy sandals' from fallback catalog",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_ea1b0c8d",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replacement_found",
+        "status": "completed",
+        "message": "Swapped in your White Sneakers (already owned, $0) for Outfit 1. New outfit cost $39.00.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_37a85aa5",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replanning Outfit 2 (attempt 1/3): $72.00 is $22.00 over the $50.00 limit.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_464a04c6",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Natural Linen Button-Down Shirt ($29.00) in Outfit 2 to bring Outfit 2 under budget; requesting tops under $7.00.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_880828d7",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy top under $7.00 (replacement search)",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_3a6764e1",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 0 products for 'beachy top' from fallback catalog",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a613e489",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "failed",
+        "message": "No tops under $7.00 matched your constraints; trying another piece.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_eab0468a",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Natural Linen Button-Down Shirt ($29.00) in Outfit 2 for a partial saving; requesting tops under $28.99.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_32be1dd7",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy top under $28.99 (replacement search)",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_72a06f04",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 8 products for 'beachy top' from fallback catalog",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_6bf481ba",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replacement_found",
+        "status": "completed",
+        "message": "Swapped in White Ribbed Tank Top ($12.00, style match 80/100) for Outfit 2. New outfit cost $55.00.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_1eeac330",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replanning Outfit 4 (attempt 1/3): $63.00 is $13.00 over the $50.00 limit.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_fd13c196",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Black Wrap Midi Dress ($39.00) in Outfit 4 to bring Outfit 4 under budget; requesting dresses under $26.00.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_ef6d9bcf",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy dress under $26.00 (replacement search)",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_92b4075b",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 0 products for 'beachy dress' from fallback catalog",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_7ad02723",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "failed",
+        "message": "No dresses under $26.00 matched your constraints; trying another piece.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a0427f07",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Tan Leather Slide Sandals ($24.00) in Outfit 4 to bring Outfit 4 under budget; requesting shoes under $11.00.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_9eddf435",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy sandals under $11.00 (replacement search)",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_85a7b7cf",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 0 products for 'beachy sandals' from fallback catalog",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_f9c5c568",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replacement_found",
+        "status": "completed",
+        "message": "Swapped in your White Sneakers (already owned, $0) for Outfit 4. New outfit cost $39.00.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_c0652974",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replanning Outfit 5 (attempt 1/3): $65.00 is $15.00 over the $50.00 limit.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_e6181d19",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Natural Jute Espadrilles ($28.00) in Outfit 5 to bring Outfit 5 under budget; requesting shoes under $13.00.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_61cfdffe",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy sandals under $13.00 (replacement search)",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_e4a19414",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 1 products for 'beachy sandals' from fallback catalog",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a0edb710",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replacement_found",
+        "status": "completed",
+        "message": "Swapped in Cream Woven Flip Flops ($12.00, style match 90/100) for Outfit 5. New outfit cost $49.00.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_bf9f9195",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 1: $39.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_0117c6f2",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_violation",
+        "status": "completed",
+        "message": "Rejected outfit 2: $55.00 exceeds the $50.00 limit.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_92042554",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 3: $50.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_3",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_8437ec4b",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 4: $39.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_c3cb382c",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 5: $49.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_f092837f",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Trip total $174.00 (each item counted once) is within the $500.00 budget.",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_ca34c051",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replanning Outfit 2 (attempt 2/3): $55.00 is $5.00 over the $50.00 limit.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_b2adeb8c",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replanning",
+        "status": "working",
+        "message": "Replacing Tan Leather Slide Sandals ($24.00) in Outfit 2 to bring Outfit 2 under budget; requesting shoes under $19.00.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_9dc07e5f",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_started",
+        "status": "working",
+        "message": "Searching for beachy sandals under $19.00 (replacement search)",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_13ea3928",
+        "session_id": "session_demo",
+        "agent": "search_agent",
+        "type": "search_completed",
+        "status": "completed",
+        "message": "Found 2 products for 'beachy sandals' from fallback catalog",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_7c0b88a1",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "replacement_found",
+        "status": "completed",
+        "message": "Swapped in your White Sneakers (already owned, $0) for Outfit 2. New outfit cost $31.00.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_853eeb49",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 1: $39.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_10c69558",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 2: $31.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_92b66fa3",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 3: $50.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_3",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_4ad3e144",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 4: $39.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_2dbb1e01",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Outfit 5: $49.00 \u2264 $50.00. Valid.",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_b942b979",
+        "session_id": "session_demo",
+        "agent": "budget_agent",
+        "type": "constraint_check",
+        "status": "completed",
+        "message": "Trip total $150.00 (each item counted once) is within the $500.00 budget.",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_d32af08b",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_accepted",
+        "status": "completed",
+        "message": "Outfit 1 accepted \u2014 Beige Crochet Tank $18.00 + Sand Gauze Midi Skirt $21.00 + your White Sneakers",
+        "outfit_id": "outfit_1",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_35fe8e83",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_accepted",
+        "status": "completed",
+        "message": "Outfit 2 accepted \u2014 White Ribbed Tank Top $12.00 + Cream Linen Shorts $19.00 + your White Sneakers",
+        "outfit_id": "outfit_2",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_c4252e7f",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_accepted",
+        "status": "completed",
+        "message": "Outfit 3 accepted \u2014 Natural Linen Button-Down Shirt $29.00 + Sand Gauze Midi Skirt $21.00 + your White Sneakers",
+        "outfit_id": "outfit_3",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_d9d638bf",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_accepted",
+        "status": "completed",
+        "message": "Outfit 4 accepted \u2014 Black Wrap Midi Dress $39.00 + your White Sneakers",
+        "outfit_id": "outfit_4",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_a1518436",
+        "session_id": "session_demo",
+        "agent": "planner",
+        "type": "outfit_accepted",
+        "status": "completed",
+        "message": "Outfit 5 accepted \u2014 Beige Crochet Tank $18.00 + Cream Linen Shorts $19.00 + Cream Woven Flip Flops $12.00",
+        "outfit_id": "outfit_5",
+        "timestamp": "2026-10-24T05:05:55Z"
+      },
+      {
+        "id": "event_08763ed6",
+        "session_id": "session_demo",
+        "agent": "orchestrator",
+        "type": "plan_completed",
+        "status": "completed",
+        "message": "I created 5 outfits for San Diego within your constraints. New purchases total $150.00 of your $500.00 budget. I reused your White Sneakers instead of buying new.",
+        "outfit_id": null,
+        "timestamp": "2026-10-24T05:05:55Z"
+      }
+    ],
+    "constraint_violations": [],
+    "all_constraints_satisfied": true,
+    "message": "I created 5 outfits for San Diego within your constraints. New purchases total $150.00 of your $500.00 budget. I reused your White Sneakers instead of buying new."
+  },
+  "wardrobe_items_to_save": [
+    {
+      "id": "wardrobe_white_sneakers",
+      "user_id": "user_123",
+      "name": "White Sneakers",
+      "category": "shoes",
+      "subcategory": "sneakers",
+      "colors": [
+        "white"
+      ],
+      "tags": [],
+      "image_url": null,
+      "estimated_value": null,
+      "memory_type": "remembered",
+      "created_at": "2026-10-24T05:05:55Z",
+      "expires_at": null
+    }
+  ],
+  "conflict": null,
+  "profile_updates": null
+}
