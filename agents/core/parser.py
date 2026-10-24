@@ -27,6 +27,11 @@ REMEMBER_RE = re.compile(r"\bremember\b|\bsave (?:that|this)\b|\bdon'?t forget\b
 STRONG_AVOID_RE = re.compile(r"\bnever\b|\bmust not\b|\babsolutely no\b|\bno (?:way|matter what)\b", re.I)
 AVOID_TRIGGER_RE = re.compile(r"\b(hate|don'?t like|do not like|dislike|avoid|not a fan of|never|no more|can'?t stand|must not)\b", re.I)
 LIKE_TRIGGER_RE = re.compile(r"\b(like|love|prefer|favou?rite|into|want)\b", re.I)
+# phrases that introduce required pieces: "one outfit should have a crochet top and skirt"
+REQUIRE_TRIGGER_RE = re.compile(
+    r"\b(needs?|need to (?:have|include)|must (?:have|include|be|feature)|should (?:have|include|be|feature|use)|"
+    r"has to (?:have|include)|have to (?:have|include)|has|include[sd]?|including|requires?|required|wants?|"
+    r"would like|i'?d like|looking for|featuring|with an?|with)\b", re.I)
 OWN_TRIGGER_RE = re.compile(r"\b(?:i|we)\s+(?:already\s+)?(?:own|have|got|bought)\b", re.I)
 
 
@@ -172,8 +177,8 @@ def rule_parse(text: str) -> dict:
         colors_here = _colors_in(c)
         if colors_here and (LIKE_TRIGGER_RE.search(c) or "aesthetic" in c or "palette" in c or "vibe" in c):
             preferred += [x for x in colors_here if x not in preferred]
-        if re.search(r"\b(needs?|must have|must include|include|requires?|want)\b", c):
-            trig = re.search(r"\b(needs?|must have|must include|include|requires?|want)\b", c)
+        trig = REQUIRE_TRIGGER_RE.search(c)
+        if trig:
             for g in _garment_phrases(c[trig.end():]):
                 if all(r["item"] != g for r in required):
                     target = None

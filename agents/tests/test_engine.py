@@ -67,6 +67,19 @@ class TestParser(unittest.TestCase):
             got = (r["location"], r["duration_days"], r["number_of_outfits"], r["per_outfit_budget"], r["total_budget"])
             self.assertEqual(got, exp, text)
 
+    def test_required_item_phrasings(self):
+        for text in ["One outfit should have a crochet top and skirt.",
+                     "One outfit needs a crochet top and skirt.",
+                     "I'd like one outfit with a crochet top and skirt.",
+                     "One outfit must include a crochet top and skirt.",
+                     "One look has to have a crochet top and skirt.",
+                     "Please include a crochet top and skirt in one outfit."]:
+            r = parse_request("5 outfits under $50 each. " + text + " I own white sneakers.", "s", "u",
+                              use_llm=False)["request"]
+            self.assertEqual([i["item"] for i in r["required_items"]], ["crochet top", "skirt"], text)
+            self.assertIn("required_items", r["hard_constraints"], text)
+            self.assertEqual(r["owned_item_references"], ["wardrobe_white_sneakers"], text)
+
     def test_memory_rule(self):
         remembered = parse_request(CANONICAL, "s", "u", use_llm=False)["new_wardrobe_items"][0]
         self.assertEqual(remembered["memory_type"], "remembered")
