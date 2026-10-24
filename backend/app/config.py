@@ -10,6 +10,7 @@ class Settings:
     cartesia_stt_model: str
     cartesia_tts_model: str
     cartesia_voice_id: str
+    agents_base_url: str
     allowed_origins: tuple[str, ...]
 
 
@@ -27,6 +28,7 @@ def load_settings() -> Settings:
         cartesia_voice_id=os.getenv(
             "CARTESIA_VOICE_ID", "e07c00bc-4134-4eae-9ea4-1a55fb45746b"
         ),
+        agents_base_url=os.getenv("AGENTS_BASE_URL", "http://localhost:8001").rstrip("/"),
         allowed_origins=origins,
     )
 

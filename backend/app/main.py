@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import load_settings
+from .agents_client import AgentsClient, AgentsUnavailableError
 from .schemas import AgentEvent, VoiceTurnRequest, VoiceTurnResponse
+from .session_mapper import to_style_session
 from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 
 
@@ -24,7 +26,32 @@ async def health() -> dict[str, object]:
         "cartesia_configured": bool(settings.cartesia_api_key),
         "stt_model": settings.cartesia_stt_model,
         "tts_model": settings.cartesia_tts_model,
+        "agents_base_url": settings.agents_base_url,
     }
+
+
+@app.post("/api/style-sessions")
+async def create_style_session(request: dict[str, object]) -> dict[str, object]:
+    prompt = str(request.get("prompt") or "").strip()
+    if not prompt:
+        raise HTTPException(status_code=422, detail="prompt is required")
+    try:
+        result = await AgentsClient(settings).plan(prompt, "demo_user", "session_live")
+    except AgentsUnavailableError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    return to_style_session(result)
+
+
+@app.post("/api/style-sessions/{session_id}/modifications")
+async def modify_style_session(session_id: str, request: dict[str, object]) -> dict[str, object]:
+    instruction = str(request.get("instruction") or "").strip()
+    if not instruction:
+        raise HTTPException(status_code=422, detail="instruction is required")
+    try:
+        result = await AgentsClient(settings).modify(session_id, "demo_user", instruction)
+    except AgentsUnavailableError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    return to_style_session(result)
 
 
 @app.post("/api/voice-sessions/{session_id}/turns", response_model=VoiceTurnResponse)
