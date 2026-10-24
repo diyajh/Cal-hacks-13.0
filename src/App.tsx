@@ -21,12 +21,26 @@ function Score({ outfit }: { outfit: Outfit }) {
 }
 
 function EditorialStage({ session, onProduct, onOutfit, onPlan }: { session: typeof demoSession; onProduct: (product: Product) => void; onOutfit: (outfit: Outfit) => void; onPlan: () => void }) {
+  const stageRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    const move = (event: PointerEvent) => {
+      const bounds = stage.getBoundingClientRect()
+      stage.style.setProperty('--px', `${((event.clientX - bounds.left) / bounds.width - 0.5) * 16}px`)
+      stage.style.setProperty('--py', `${((event.clientY - bounds.top) / bounds.height - 0.5) * 12}px`)
+    }
+    const reset = () => { stage.style.setProperty('--px', '0px'); stage.style.setProperty('--py', '0px') }
+    stage.addEventListener('pointermove', move)
+    stage.addEventListener('pointerleave', reset)
+    return () => { stage.removeEventListener('pointermove', move); stage.removeEventListener('pointerleave', reset) }
+  }, [])
   const products = Array.from(new Map(session.outfits.flatMap(outfit => outfit.products).map(product => [product.id, product])).values()).slice(0, 9)
-  return <section className="editorial-stage" aria-label="Aura editorial recommendation stage">
+  return <section ref={stageRef} className="editorial-stage" aria-label="Aura editorial recommendation stage">
     <div className="stage-heading"><span>AURA — PERSONAL SHOPPING AGENT</span><small>{session.parsedRequest.destination || 'Your trip'} · {session.outfits.length} looks</small></div>
     <div className="stage-wordmark" aria-hidden="true">AURA</div>
     <div className="stage-subtitle">Your wardrobe, interpreted.</div>
-    {products.map((product, index) => <button className={`floating-product depth-${index % 4}`} key={product.id} onClick={() => onProduct(product)} style={{ '--x': `${8 + ((index * 31) % 84)}%`, '--y': `${17 + ((index * 19) % 64)}%`, '--r': `${-9 + (index % 5) * 5}deg` } as CSSProperties} aria-label={`Inspect ${product.name}`}><span className="floating-image" style={{ backgroundImage: product.image ? `url(${product.image})` : undefined }} /><span className="floating-label">{product.name}<small>{product.owned ? 'In wardrobe' : `${product.retailer} · $${product.price}`}</small></span></button>)}
+    {products.map((product, index) => <button className={`floating-product depth-${index % 4}`} key={product.id} onClick={() => onProduct(product)} style={{ '--x': `${8 + ((index * 31) % 84)}%`, '--y': `${17 + ((index * 19) % 64)}%`, '--r': `${-9 + (index % 5) * 5}deg`, '--parallax': `${0.45 + (index % 4) * 0.2}` } as CSSProperties} aria-label={`Inspect ${product.name}`}><span className="floating-image" style={{ backgroundImage: product.image ? `url(${product.image})` : undefined }} /><span className="floating-label">{product.name}<small>{product.owned ? 'In wardrobe' : `${product.retailer} · $${product.price}`}</small></span></button>)}
     <div className="stage-outfits">{session.outfits.slice(0, 5).map(outfit => <button key={outfit.id} onClick={() => onOutfit(outfit)}>Day {outfit.day} · {outfit.title}</button>)}</div>
     <div className="stage-control"><span className="eyebrow">AURA IS WORKING</span><strong>{session.agentEvents[session.agentEvents.length - 1]?.title || 'Plan ready'}</strong><p>{session.agentEvents[session.agentEvents.length - 1]?.detail || 'Explore a piece or outfit to see the reasoning.'}</p><div><span>{session.newPurchaseCost ? `$${session.newPurchaseCost} planned` : 'Budget ready'}</span><button onClick={onPlan}>Smart purchase plan →</button></div></div>
     <span className="stage-instruction">Click a piece or outfit to inspect</span>
