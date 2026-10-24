@@ -8,3 +8,10 @@
 .voice-error{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10px;color:#b56d55;padding:6px 0 0}.voice-error button{border:0;background:#f5e6dc;color:#a9664d;border-radius:12px;padding:5px 9px;font:600 10px inherit;cursor:pointer;white-space:nowrap}
 .stop-speaking{border:1px solid #718c80;background:transparent;color:#fff;border-radius:12px;padding:5px 9px;font:600 9px inherit;cursor:pointer}.voice-turn-card{position:fixed;top:83px;left:50%;transform:translateX(-50%);z-index:5;width:440px;background:#fff;border:1px solid #dfe7e1;border-radius:10px;padding:13px 15px;box-shadow:0 12px 30px #203a3420}.voice-turn-head{display:flex;justify-content:space-between;align-items:center}.voice-turn-head>span:last-child{font-size:9px;color:#9ba69f}.voice-turn{display:flex;gap:8px;margin-top:10px}.voice-turn>span{font-size:8px;letter-spacing:1px;font-weight:700;color:#96a39c;padding-top:2px;width:40px}.voice-turn p{font-size:11px;line-height:1.35;color:#52655d;margin:0;flex:1}.voice-turn.assistant p{color:#315b4a}
 @media (max-width: 900px){body{min-width:0}.sidebar{width:200px}.main{margin-left:200px;width:calc(100% - 200px);padding:25px 24px 120px}.hero,.agent-grid{grid-template-columns:1fr}.dna-card{display:none}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkout-bar{left:200px;padding:15px 24px}.modification-bar{flex-direction:column;align-items:stretch;gap:16px}.modal-backdrop{inset:0 0 0 200px}.voice-agent-strip{min-width:0;width:calc(100% - 40px)}.voice-turn-card{width:calc(100% - 40px)}.voice-error{flex-wrap:wrap}.voice-error button{margin-left:auto}}
+/* Live-plan trust and commerce overrides. */
+.check.conflict{color:#b56d50}
+.memory-controls>div{flex-wrap:wrap}
+.memory-controls small{display:block;line-height:1.4;margin-top:8px;color:#9b897b}
+.budget-summary{display:flex;justify-content:space-between;gap:12px;background:#f1e9de;border-radius:7px;padding:11px 12px;margin-bottom:14px;color:#8a7567;font-size:10px}
+.budget-summary strong{color:#52745f;font-size:10px}
+.merchant-link{margin-left:auto;color:#a86f50;font-size:10px;font-weight:600;white-space:nowrap;text-decoration:none}
