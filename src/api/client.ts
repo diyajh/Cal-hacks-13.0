@@ -10,7 +10,9 @@ import { VoiceAgentResponse } from '../voiceAgent'
  */
 const extensionRuntime = Boolean((globalThis as any).chrome?.runtime?.id)
 const configuredBase = (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
-const API_BASE_URL = configuredBase || (extensionRuntime ? 'http://127.0.0.1:8000' : '')
+// Browser development uses the shared gateway on 8000; the unpacked extension
+// uses the local merged gateway on 8006. Both remain overrideable via Vite.
+const API_BASE_URL = configuredBase || (extensionRuntime ? 'http://127.0.0.1:8006' : 'http://127.0.0.1:8000')
 const VOICE_API_BASE_URL = (import.meta as any).env?.VITE_VOICE_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8018'
 const USER_ID = (import.meta as any).env?.VITE_AURA_USER_ID || 'demo_user'
 
