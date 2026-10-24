@@ -7,6 +7,9 @@ from .agents_client import AgentsClient, AgentsUnavailableError
 from .schemas import TranscriptionResponse, VoiceSpeakRequest, VoiceTurnRequest, VoiceTurnResponse
 from .session_mapper import to_style_session
 from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
+from .routes.products import router as products_router
+from .routes.users import router as users_router
+from .routes.shopping import router as shopping_router
 
 
 settings = load_settings()
@@ -20,6 +23,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+app.include_router(products_router)
+app.include_router(users_router)
+app.include_router(shopping_router)
 
 
 @app.get("/health")

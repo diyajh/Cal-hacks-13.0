@@ -1,0 +1,32 @@
+[
+    {
+      "id": "fallback_1",
+      "name": "Beige Crochet Top",
+      "category": "top",
+      "price": 22.99,
+      "currency": "USD",
+      "retailer": "Demo Store",
+      "image_url": null,
+      "product_url": "https://example.com/top",
+      "description": "Beige crochet beach top",
+      "colors": ["beige"],
+      "tags": ["crochet", "beach", "summer"],
+      "available": true,
+      "source": "fallback"
+    },
+    {
+      "id": "fallback_2",
+      "name": "White Linen Skirt",
+      "category": "skirt",
+      "price": 24.99,
+      "currency": "USD",
+      "retailer": "Demo Store",
+      "image_url": null,
+      "product_url": "https://example.com/skirt",
+      "description": "White linen beach skirt",
+      "colors": ["white"],
+      "tags": ["linen", "beach", "summer"],
+      "available": true,
+      "source": "fallback"
+    }
+  ]
