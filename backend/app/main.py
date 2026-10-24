@@ -15,6 +15,7 @@ app = FastAPI(title="Aura Voice API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
+    allow_origin_regex=r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|chrome-extension://[a-p]{32})$",
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],

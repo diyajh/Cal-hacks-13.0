@@ -8,7 +8,9 @@ import { VoiceAgentResponse } from '../voiceAgent'
  * Keep API details here so components only deal with StyleSession objects.
  * With no VITE_API_BASE_URL, the app stays fully demoable against mock data.
  */
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
+const extensionRuntime = Boolean((globalThis as any).chrome?.runtime?.id)
+const configuredBase = (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
+const API_BASE_URL = configuredBase || (extensionRuntime ? 'http://127.0.0.1:8018' : '')
 
 export const apiConfigured = Boolean(API_BASE_URL)
 
