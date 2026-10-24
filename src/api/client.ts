@@ -49,6 +49,7 @@ export async function sendVoiceTurn(sessionId: string, transcript: string): Prom
     response_text: string
     audio_data_url?: string
     agent_events?: unknown[]
+    style_session?: StyleSession
   }>(`/api/voice-sessions/${encodeURIComponent(sessionId)}/turns`, {
     method: 'POST',
     body: JSON.stringify({ session_id: sessionId, transcript }),
@@ -61,6 +62,7 @@ export async function sendVoiceTurn(sessionId: string, transcript: string): Prom
     turns: [],
     agentEvents: response.agent_events,
     audioDataUrl: response.audio_data_url,
+    styleSession: response.style_session,
   }
 }
 

@@ -62,6 +62,7 @@ function App() {
       if (apiConfigured) {
         try {
           const response = await sendVoiceTurn(session.session, prompt)
+          if (response.styleSession) setSession(response.styleSession)
           const now = new Date().toISOString()
           setVoiceTurns(current => [...current, { id: `user-${Date.now()}`, role: 'user', text: prompt, createdAt: now }, { id: `assistant-${Date.now()}`, role: 'assistant', text: response.responseText, createdAt: now, audioUrl: response.audioDataUrl }])
           if (response.audioDataUrl) {
@@ -83,7 +84,7 @@ function App() {
         speakFallback(responseText)
       }
     }
-    if (apiConfigured) {
+    if (apiConfigured && !isVoiceTurn) {
       try { setSession(await createStyleSession(prompt)) } catch { setApiError('Live API unavailable — showing the demo plan.') }
     }
   }

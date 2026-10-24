@@ -16,4 +16,5 @@ export interface VoiceAgentResponse {
   turns: VoiceTurn[]
   agentEvents?: unknown[]
   audioDataUrl?: string
+  styleSession?: import('./types').StyleSession
 }

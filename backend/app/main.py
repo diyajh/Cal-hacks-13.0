@@ -79,6 +79,9 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
         plan = await AgentsClient(settings).plan(
             request.transcript, "demo_user", session_id
         )
+        style_session = to_style_session(plan)
+        style_session["session"] = session_id
+        SESSION_CACHE[session_id] = style_session
         recommendation = plan.get("final_recommendation") or {}
         response_text = recommendation.get("message") or (
             f"I found {len(recommendation.get('outfits') or [])} looks that match your request."
@@ -100,6 +103,7 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
         provider="cartesia",
         status="completed",
         agent_events=agent_events,
+        style_session=style_session,
     )
 
 
