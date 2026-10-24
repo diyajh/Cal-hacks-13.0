@@ -62,6 +62,18 @@ export async function sendVoiceTurn(sessionId: string, transcript: string): Prom
   }
 }
 
+export async function transcribeVoiceAudio(sessionId: string, audio: Blob): Promise<{ transcript: string; model: string }> {
+  const form = new FormData()
+  form.append('audio', audio, 'voice.webm')
+  const response = await fetch(`${API_BASE_URL}/api/voice-sessions/${encodeURIComponent(sessionId)}/transcribe`, {
+    method: 'POST',
+    body: form,
+  })
+  if (!response.ok) throw new Error(`Aura STT ${response.status}: ${await response.text()}`)
+  const result = await response.json() as { transcript: string; model: string }
+  return { transcript: result.transcript, model: result.model }
+}
+
 /** Mock-first loader used during parallel backend development. */
 export async function loadDemoOrApiSession(): Promise<StyleSession> {
   if (!apiConfigured) return demoSession

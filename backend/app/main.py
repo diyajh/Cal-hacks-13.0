@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import load_settings
 from .agents_client import AgentsClient, AgentsUnavailableError
-from .schemas import AgentEvent, VoiceTurnRequest, VoiceTurnResponse
+from .schemas import AgentEvent, TranscriptionResponse, VoiceTurnRequest, VoiceTurnResponse
 from .session_mapper import to_style_session
 from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 
@@ -81,5 +81,26 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
                 message="Voice request accepted by the style session",
             )
         ],
+    )
+
+
+@app.post("/api/voice-sessions/{session_id}/transcribe", response_model=TranscriptionResponse)
+async def transcribe_voice(session_id: str, audio: UploadFile = File(...)) -> TranscriptionResponse:
+    if not audio.content_type or not audio.content_type.startswith("audio/"):
+        raise HTTPException(status_code=415, detail="an audio upload is required")
+    data = await audio.read()
+    if not data:
+        raise HTTPException(status_code=422, detail="audio upload is empty")
+    try:
+        result = await CartesiaVoiceGateway(settings).transcribe(
+            audio.filename or "voice.webm", data, audio.content_type
+        )
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    return TranscriptionResponse(
+        session_id=session_id,
+        transcript=result.text,
+        provider="cartesia",
+        model=result.model,
     )
 

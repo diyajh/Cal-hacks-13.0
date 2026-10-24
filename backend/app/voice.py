@@ -15,6 +15,12 @@ class SynthesizedSpeech:
 
 
 @dataclass(frozen=True)
+class Transcription:
+    text: str
+    model: str
+
+
+@dataclass(frozen=True)
 class CartesiaVoiceGateway:
     settings: Settings
 
@@ -54,4 +60,17 @@ class CartesiaVoiceGateway:
             audio_data_url=f"data:audio/wav;base64,{encoded}",
             content_type="audio/wav",
         )
+
+    async def transcribe(self, filename: str, audio: bytes, content_type: str) -> Transcription:
+        """Transcribe one recorded browser audio blob through Cartesia Ink."""
+        self.assert_configured()
+        from cartesia import AsyncCartesia
+
+        async with AsyncCartesia(api_key=self.settings.cartesia_api_key) as client:
+            response = await client.stt.transcribe(
+                file=(filename, audio, content_type),
+                model=self.settings.cartesia_stt_model,
+                language="en",
+            )
+        return Transcription(text=response.text, model=self.settings.cartesia_stt_model)
 

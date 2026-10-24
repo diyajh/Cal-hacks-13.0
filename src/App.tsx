@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { demoSession } from './mockData'
 import { Outfit, Product } from './types'
-import { apiConfigured, createStyleSession, loadDemoOrApiSession, modifyStyleSession, sendVoiceTurn } from './api/client'
+import { apiConfigured, createStyleSession, loadDemoOrApiSession, modifyStyleSession, sendVoiceTurn, transcribeVoiceAudio } from './api/client'
 import { BrowserSpeechRecognition, createSpeechRecognition } from './voice'
 import { VoiceAgentState, VoiceTurn } from './voiceAgent'
 
@@ -30,6 +30,8 @@ function App() {
   const [apiError, setApiError] = useState('')
   const [voiceError, setVoiceError] = useState('')
   const [recognition, setRecognition] = useState<BrowserSpeechRecognition | null>(null)
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
+  const audioChunks = useRef<Blob[]>([])
   const [voiceState, setVoiceState] = useState<VoiceAgentState>('idle')
   const [voiceTranscript, setVoiceTranscript] = useState('')
   const [voiceTurns, setVoiceTurns] = useState<VoiceTurn[]>([])
@@ -90,10 +92,52 @@ function App() {
     setIsSpeaking(false)
     setVoiceState('heard')
   }
-  const toggleVoice = () => {
+  const toggleVoice = async () => {
     if (isListening) {
-      recognition?.stop()
-      setVoiceState('heard')
+      if (apiConfigured) {
+        mediaRecorder?.stop()
+      } else {
+        recognition?.stop()
+        setVoiceState('heard')
+      }
+      return
+    }
+    if (apiConfigured) {
+      if (!navigator.mediaDevices?.getUserMedia || !('MediaRecorder' in window)) {
+        setVoiceState('error')
+        setVoiceError('Live microphone recording is not supported here. You can still type your request.')
+        return
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        const recorder = new MediaRecorder(stream)
+        audioChunks.current = []
+        recorder.ondataavailable = event => { if (event.data.size > 0) audioChunks.current.push(event.data) }
+        recorder.onstop = async () => {
+          stream.getTracks().forEach(track => track.stop())
+          setMediaRecorder(null)
+          setIsListening(false)
+          setVoiceState('thinking')
+          try {
+            const blob = new Blob(audioChunks.current, { type: recorder.mimeType || 'audio/webm' })
+            const result = await transcribeVoiceAudio(session.session, blob)
+            setVoiceTranscript(result.transcript)
+            setInput(current => `${current}${current ? ' ' : ''}${result.transcript}`)
+            setVoiceState('heard')
+          } catch {
+            setVoiceState('error')
+            setVoiceError('Aura could not transcribe that recording. Please try again or type your request.')
+          }
+        }
+        recorder.start()
+        setMediaRecorder(recorder)
+        setVoiceError('')
+        setVoiceState('listening')
+        setIsListening(true)
+      } catch {
+        setVoiceState('error')
+        setVoiceError('Microphone permission was denied. You can still type your request.')
+      }
       return
     }
     const nextRecognition = createSpeechRecognition()

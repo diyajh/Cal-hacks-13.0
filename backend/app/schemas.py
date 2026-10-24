@@ -33,3 +33,10 @@ class VoiceTurnResponse(BaseModel):
     provider: Literal["cartesia"]
     status: Literal["accepted", "completed"]
 
+
+class TranscriptionResponse(BaseModel):
+    session_id: str
+    transcript: str
+    provider: Literal["cartesia"]
+    model: str
+
