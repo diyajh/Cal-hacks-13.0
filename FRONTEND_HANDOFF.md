@@ -31,11 +31,13 @@ src/
 
 Keep the same `StyleSession` shape while swapping the mock import for `getStyleSession()`.
 
-The first adapter is already scaffolded in `src/api/client.ts`:
+The frontend adapter now targets Person 2's gateway:
 
-- `createStyleSession(prompt)` → `POST /api/style-sessions`
-- `getStyleSession(sessionId)` → `GET /api/style-sessions/:id`
-- `modifyStyleSession(sessionId, instruction)` → `POST /api/style-sessions/:id/modifications`
+- `createStyleSession(prompt)` → `POST /shopping/plan` with `{ raw_request, user_id, session_id }`
+- `modifyStyleSession(sessionId, instruction)` → `POST /shopping/modify` with `{ session_id, user_id, message, target_outfit_id: null }`
+- The gateway forwards planning to Person 1 and returns `final_recommendation`, `conflict`, and `wardrobe_items_to_save`.
+- Real product fields are normalized from `image_url` and `product_url` into the UI's `image` and `link` fields.
+- `conflict.status === "needs_user_input"` is shown as an explicit choice instead of rendering an invalid plan.
 
 Set `VITE_API_BASE_URL` when the FastAPI service is ready. Leave it unset to keep the mock demo fully offline.
 
@@ -45,7 +47,7 @@ Set `VITE_API_BASE_URL` when the FastAPI service is ready. Leave it unset to kee
 
 ## Backend seam
 
-The API should return `StyleSession` (or a versioned envelope around it). Agent events can arrive as a stream later; for the first integration, returning the complete `agent_events` array is enough. The UI currently accepts `status: 'done' | 'active'`, so a websocket/SSE adapter can append events without changing the visual layer.
+The API returns the agent contract unchanged. `final_recommendation.outfits[].items[]` may contain either a live `product` or a `wardrobe_item`; `purchase_required === false` marks reuse. The UI derives the smart purchase plan from those items and only links to a non-empty real `product_url`. Agent events arrive as a complete `agent_events` array; no streaming dependency is required for the demo.
 
 ## Demo path
 

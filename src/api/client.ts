@@ -12,6 +12,7 @@ const extensionRuntime = Boolean((globalThis as any).chrome?.runtime?.id)
 const configuredBase = (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
 const API_BASE_URL = configuredBase || (extensionRuntime ? 'http://127.0.0.1:8000' : '')
 const VOICE_API_BASE_URL = (import.meta as any).env?.VITE_VOICE_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8018'
+const USER_ID = (import.meta as any).env?.VITE_AURA_USER_ID || 'demo_user'
 
 export const apiConfigured = Boolean(API_BASE_URL)
 
@@ -70,10 +71,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export async function createStyleSession(prompt: string): Promise<StyleSession> {
+const newSessionId = () => typeof crypto !== 'undefined' && crypto.randomUUID
+  ? crypto.randomUUID()
+  : `session-${Date.now()}`
+
+export async function createStyleSession(prompt: string, sessionId = newSessionId()): Promise<StyleSession> {
   const response = await request<any>('/shopping/plan', {
     method: 'POST',
-    body: JSON.stringify({ prompt, user_id: 'demo_user' }),
+    // Person 2's gateway forwards this request to Person 1 unchanged.
+    body: JSON.stringify({ raw_request: prompt, user_id: USER_ID, session_id: sessionId }),
   })
   return normalizeSession(response)
 }
@@ -85,14 +91,15 @@ export async function getStyleSession(sessionId: string): Promise<StyleSession> 
 export async function modifyStyleSession(sessionId: string, instruction: string): Promise<StyleSession> {
   const response = await request<any>('/shopping/modify', {
     method: 'POST',
-    body: JSON.stringify({ session_id: sessionId, user_id: 'demo_user', message: instruction, target_outfit_id: null }),
+    body: JSON.stringify({ session_id: sessionId, user_id: USER_ID, message: instruction, target_outfit_id: null }),
   })
   return normalizeSession(response)
 }
 
 /** Cartesia stays server-side: the browser sends transcript text, never an API key. */
 export async function sendVoiceTurn(sessionId: string, transcript: string): Promise<VoiceAgentResponse> {
-  const styleSession = await createStyleSession(transcript)
+  // Voice must use the same single planning request and session as typed input.
+  const styleSession = await createStyleSession(transcript, sessionId)
   const response = await fetch(`${VOICE_API_BASE_URL}/api/voice-sessions/${encodeURIComponent(sessionId)}/speak`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

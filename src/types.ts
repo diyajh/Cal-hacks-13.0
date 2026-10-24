@@ -1,4 +1,4 @@
-export type ProductCategory = 'top' | 'bottom' | 'dress' | 'layer' | 'shoes' | 'accessory'
+export type ProductCategory = 'top' | 'bottom' | 'dress' | 'layer' | 'outerwear' | 'shoes' | 'accessory'
 
 export interface StyleDNA { label: string; value: number; color: string }
 export interface ParsedRequest {
