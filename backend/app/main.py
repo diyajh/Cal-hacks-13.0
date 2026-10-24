@@ -1,14 +1,28 @@
-from fastapi import FastAPI
+from uuid import uuid4
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.products import router as products_router
 from app.routes.users import router as users_router
 from app.routes.shopping import router as shopping_router
 
-app = FastAPI(
-    title="Shopping Agent API",
-    version="0.1.0"
+from app.config import load_settings
+from app.agents_client import AgentsClient, AgentsUnavailableError
+from app.schemas import (
+    TranscriptionResponse,
+    VoiceSpeakRequest,
+    VoiceTurnRequest,
+    VoiceTurnResponse,
 )
+from app.session_mapper import to_style_session
+from app.voice import CartesiaVoiceGateway, ProviderNotConfiguredError
+
+
+settings = load_settings()
+SESSION_CACHE: dict[str, dict[str, object]] = {}
+
+app = FastAPI(title="Aura Shopping Agent API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,9 +33,182 @@ app.add_middleware(
 
 app.include_router(products_router)
 app.include_router(users_router)
+app.include_router(shopping_router)
 
 
 @app.get("/health")
-def health():
-    return {"status": "ok"}
-app.include_router(shopping_router)
+async def health():
+    return {
+        "status": "ok",
+        "cartesia_configured": bool(settings.cartesia_api_key),
+        "agents_base_url": settings.agents_base_url,
+    }
+
+
+@app.post("/api/style-sessions")
+async def create_style_session(request: dict[str, object]):
+    prompt = str(request.get("prompt") or "").strip()
+
+    if not prompt:
+        raise HTTPException(status_code=422, detail="prompt is required")
+
+    try:
+        result = await AgentsClient(settings).plan(
+            prompt,
+            "demo_user",
+            f"session_{uuid4().hex[:10]}",
+        )
+    except AgentsUnavailableError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    session = to_style_session(result)
+    SESSION_CACHE[str(session["session"])] = session
+
+    return session
+
+
+@app.get("/api/style-sessions/{session_id}")
+async def get_style_session(session_id: str):
+    session = SESSION_CACHE.get(session_id)
+
+    if not session:
+        raise HTTPException(status_code=404, detail="style session not found")
+
+    return session
+
+
+@app.post("/api/style-sessions/{session_id}/modifications")
+async def modify_style_session(
+    session_id: str,
+    request: dict[str, object],
+):
+    instruction = str(request.get("instruction") or "").strip()
+
+    if not instruction:
+        raise HTTPException(status_code=422, detail="instruction is required")
+
+    try:
+        result = await AgentsClient(settings).modify(
+            session_id,
+            "demo_user",
+            instruction,
+        )
+    except AgentsUnavailableError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    session = to_style_session(result)
+    SESSION_CACHE[session_id] = session
+
+    return session
+
+
+@app.post(
+    "/api/voice-sessions/{session_id}/turns",
+    response_model=VoiceTurnResponse,
+)
+async def voice_turn(
+    session_id: str,
+    request: VoiceTurnRequest,
+):
+    if request.session_id != session_id:
+        raise HTTPException(
+            status_code=400,
+            detail="session_id does not match route",
+        )
+
+    gateway = CartesiaVoiceGateway(settings)
+
+    try:
+        plan = await AgentsClient(settings).plan(
+            request.transcript,
+            "demo_user",
+            session_id,
+        )
+
+        style_session = to_style_session(plan)
+        style_session["session"] = session_id
+        SESSION_CACHE[session_id] = style_session
+
+        recommendation = plan.get("final_recommendation") or {}
+
+        response_text = recommendation.get("message") or (
+            f"I found {len(recommendation.get('outfits') or [])} "
+            "looks that match your request."
+        )
+
+        speech = await gateway.synthesize(str(response_text))
+        agent_events = recommendation.get("agent_events") or []
+
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except AgentsUnavailableError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except NotImplementedError as error:
+        raise HTTPException(status_code=501, detail=str(error)) from error
+
+    return VoiceTurnResponse(
+        session_id=session_id,
+        transcript=request.transcript,
+        response_text=str(response_text),
+        audio_data_url=speech.audio_data_url,
+        provider="cartesia",
+        status="completed",
+        agent_events=agent_events,
+        style_session=style_session,
+    )
+
+
+@app.post("/api/voice-sessions/{session_id}/speak")
+async def speak_voice_response(
+    session_id: str,
+    request: VoiceSpeakRequest,
+):
+    try:
+        speech = await CartesiaVoiceGateway(settings).synthesize(request.text)
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    return {
+        "session_id": session_id,
+        "audio_data_url": speech.audio_data_url,
+        "provider": "cartesia",
+    }
+
+
+@app.post(
+    "/api/voice-sessions/{session_id}/transcribe",
+    response_model=TranscriptionResponse,
+)
+async def transcribe_voice(
+    session_id: str,
+    audio: UploadFile = File(...),
+):
+    if not audio.content_type or not audio.content_type.startswith("audio/"):
+        raise HTTPException(
+            status_code=415,
+            detail="an audio upload is required",
+        )
+
+    data = await audio.read()
+
+    if not data:
+        raise HTTPException(
+            status_code=422,
+            detail="audio upload is empty",
+        )
+
+    try:
+        result = await CartesiaVoiceGateway(settings).transcribe(
+            audio.filename or "voice.webm",
+            data,
+            audio.content_type,
+        )
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    return TranscriptionResponse(
+        session_id=session_id,
+        transcript=result.text,
+        provider="cartesia",
+        model=result.model,
+    )
