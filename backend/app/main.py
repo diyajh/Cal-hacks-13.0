@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.products import router as products_router
 from app.routes.users import router as users_router
+from app.routes.shopping import router as shopping_router
 
 app = FastAPI(
     title="Shopping Agent API",
@@ -23,3 +24,4 @@ app.include_router(users_router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+app.include_router(shopping_router)
