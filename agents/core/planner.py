@@ -128,7 +128,7 @@ class TripPlanner:
             occ = occs[i % len(occs)]
             template = ["dress", "shoes"] if occ in tx.DRESS_OCCASIONS else ["top", "bottom", "shoes"]
             self.outfits.append({
-                "id": f"outfit_{i + 1}", "day": (i % days) + 1 if days else i + 1, "occasion": occ,
+                "id": f"outfit_{i + 1}", "day": ((i * days) // n) + 1 if days and n > days else i + 1, "occasion": occ,
                 "template": template, "picks": {s: None for s in template}, "required": {},
                 "style_modifiers": [], "excluded": [], "attempts": 0,
             })

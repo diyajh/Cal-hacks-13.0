@@ -102,3 +102,22 @@ result = await plan_shopping(raw_request, user_id, session_id, profile, wardrobe
 2. **Conflict options** (§18) are returned beside FinalRecommendation as `conflict`, because FinalRecommendation has no field for them. The `message` field also explains the conflict. If Person 3 wants the options inside FinalRecommendation, we should agree to add `"conflict": null | {...}` to the contract.
 3. **Per-outfit cost** counts the full price of every purchased piece in that outfit, even if it is reused elsewhere. **Trip total** counts each product once.
 4. Session state for `/modify` lives in the orchestrator process (memory + `agents/.sessions/*.json`, gitignored).
+
+## Fetch.ai agents (for judges)
+
+![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
+![tag:hackathon](https://img.shields.io/badge/hackathon-5F43F1)
+
+An autonomous personal shopping and styling system: four uAgents turn one natural-language request
+into complete outfits from real products, enforce hard budgets, reuse the shopper's own wardrobe, and
+autonomously replan when a constraint fails. Chat with the orchestrator from ASI:One.
+
+| Agent | Role | Address |
+|---|---|---|
+| **orchestrator** | Entry point (Chat Protocol + REST). Parses intent, plans outfits, drives the replanning loop. | `agent1qv6ukxyhvpannewqqlqw22p0x5vn8azesvww2r0z78t0uvhvjg0xgjzatfe` |
+| **search_agent** | Retrieves normalized products (category, colors, max price) from the product service. | `agent1q0k4uu2x38n24a6hvrhq8gvt8gsqu4unf6egkslrhh0hakc7vdlf5dw7nvp` |
+| **style_agent** | Scores products 0–100 for style, color, occasion and preferences; excludes avoided colors. | `agent1q2j4zjedfq7l43ndxhk22khpy98s7306zkvuzjpdxtc5m4gg65xzu766dp0` |
+| **budget_agent** | Enforces hard constraints (per-outfit and trip budgets, required items) and rejects violations. | `agent1q2tujpy9t5p8223p0g77mrzvdmepf4tvyt87082he2aaau4jw0d8crakfcj` |
+
+Example chat: *"I'm going to San Diego for five days. I need five outfits under $50 each, $500 total, beachy neutral,
+one outfit needs a crochet top and skirt, I already own white sneakers."*

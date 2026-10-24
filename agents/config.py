@@ -58,4 +58,10 @@ ORCHESTRATOR_PORT = _int("AGENTS_PORT", 8001)
 AGENT_SEED_PREFIX = os.environ.get("AGENT_SEED_PREFIX") or "calhacks13-shopping-dev-seed"
 AGENT_CALL_TIMEOUT = _int("AGENT_CALL_TIMEOUT", 60)
 
+# Agentverse: set AGENTVERSE_MAILBOX=true to connect the agents to Agentverse via mailboxes
+# (then open the "Agent inspector" link each agent prints and click Connect -> Mailbox).
+AGENTVERSE_MAILBOX = os.environ.get("AGENTVERSE_MAILBOX", "").strip().lower() in ("1", "true", "yes", "all")
+# Used at startup to auto-connect each agent's Agentverse mailbox (see agents/fetch/factory.py).
+AGENTVERSE_API_KEY = os.environ.get("AGENTVERSE_API_KEY", "").strip()
+
 SESSION_DIR = AGENTS_DIR / ".sessions"

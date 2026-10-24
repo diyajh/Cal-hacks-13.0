@@ -55,6 +55,18 @@ class TestParser(unittest.TestCase):
         self.assertEqual(r["owned_item_references"], ["wardrobe_white_sneakers"])
         self.assertEqual((r["per_outfit_budget"], r["total_budget"]), (50, 500))
 
+    def test_casual_phrasings(self):
+        cases = {
+            "I want to go to San diego for 5 days, select 5 outfits under 50$ total outfit budget  is 500$.":
+                ("San Diego", 5, 5, 50, 500),
+            "trip to new york for a week, 4 outfits, max 60 dollars per outfit, 300 total": ("New York", 7, 4, 60, 300),
+            "Paris trip 4 days, 4 outfits, $80 per outfit, total $300": ("Paris", 4, 4, 80, 300),
+        }
+        for text, exp in cases.items():
+            r = parse_request(text, "s", "u", use_llm=False)["request"]
+            got = (r["location"], r["duration_days"], r["number_of_outfits"], r["per_outfit_budget"], r["total_budget"])
+            self.assertEqual(got, exp, text)
+
     def test_memory_rule(self):
         remembered = parse_request(CANONICAL, "s", "u", use_llm=False)["new_wardrobe_items"][0]
         self.assertEqual(remembered["memory_type"], "remembered")

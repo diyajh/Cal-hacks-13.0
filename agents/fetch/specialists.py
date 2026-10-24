@@ -7,16 +7,20 @@ from __future__ import annotations
 
 import asyncio
 
-from uagents import Agent, Context
+from uagents import Context
 
-from agents import config
+from agents.fetch.factory import make_agent
 from agents.core.agent_logic import budget_agent_handle, search_agent_handle, style_agent_handle
 from agents.fetch.messages import (ConstraintCheckMsg, ConstraintResultMsg, SearchRequestMsg, SearchResponseMsg,
                                    StyleRequestMsg, StyleResponseMsg)
 
-search_agent = Agent(name="search_agent", seed=f"{config.AGENT_SEED_PREFIX}-search")
-style_agent = Agent(name="style_agent", seed=f"{config.AGENT_SEED_PREFIX}-style")
-budget_agent = Agent(name="budget_agent", seed=f"{config.AGENT_SEED_PREFIX}-budget")
+search_agent = make_agent("search_agent", "search",
+                          "Finds real products for a shopping plan (category, colors, max price) via the product service.")
+style_agent = make_agent("style_agent", "style",
+                         "Scores products 0-100 for style, color, occasion and preference fit; excludes avoided colors/styles.")
+budget_agent = make_agent("budget_agent", "budget",
+                          "Checks hard constraints: per-outfit budget, trip budget (reused items counted once), "
+                          "required items, outfit count and completeness.")
 
 
 @search_agent.on_message(model=SearchRequestMsg, replies=SearchResponseMsg)

@@ -16,7 +16,12 @@ from agents.core.contract import make_wardrobe_item, normalize_shopping_request
 from agents.core.llm import call_llm_json, llm_available
 
 _NUM = r"\b(\d+|" + "|".join(sorted(tx.NUMBER_WORDS, key=len, reverse=True)) + r")"
-_MONEY = r"\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)|(\d+(?:\.\d+)?)\s?(?:dollars|usd|bucks)"
+_N = r"(\d+(?:,\d{3})*(?:\.\d+)?)"
+# money with an explicit marker: $50, 50$, 50 dollars/usd/bucks
+_MONEY = r"\$\s?" + _N + r"|" + _N + r"\s?(?:\$|dollars?|usd|bucks)"
+# amount in a budget context: marker optional ("total budget is 500")
+_AMT = r"\$?\s?" + _N + r"\s?(?:\$|dollars?|usd|bucks)?"
+_LOC_STOP = {"the", "a", "an", "my", "our", "beach", "work", "school", "dinner", "brunch", "party", "wedding"}
 
 REMEMBER_RE = re.compile(r"\bremember\b|\bsave (?:that|this)\b|\bdon'?t forget\b", re.I)
 STRONG_AVOID_RE = re.compile(r"\bnever\b|\bmust not\b|\babsolutely no\b|\bno (?:way|matter what)\b", re.I)
@@ -68,10 +73,19 @@ def rule_parse(text: str) -> dict:
     low = t.lower()
     data: dict = {}
 
-    # location
-    m = re.search(r"\b(?:to|in|visiting|at)\s+((?:[A-Z][a-zA-Z]+)(?:\s+[A-Z][a-zA-Z]+){0,3})", t)
-    if m and m.group(1) not in {"I", "My"}:
-        data["location"] = m.group(1)
+    # location: after travel phrases (any capitalization), else a Capitalized place after to/in/at
+    m = re.search(
+        r"\b(?:going to|go to|goin to|trip to|travel(?:ing|ling)? to|fly(?:ing)? to|head(?:ed|ing)? to|"
+        r"visit(?:ing)?|vacation in|holiday in|staying in|weekend in|week in|days? in|nights? in)\s+"
+        r"([a-z][a-z.'\-]*(?:\s+[a-z][a-z.'\-]*){0,3}?)"
+        r"(?=\s+(?:for|with|and|next|this|on|from|to|in|over|during|i|we|my)\b|\s*[,.!?;]|\s*$)", low)
+    if m and m.group(1).split()[0] not in _LOC_STOP:
+        data["location"] = " ".join(w.capitalize() for w in m.group(1).split())
+    else:
+        m = (re.search(r"\b(?:to|in|at)\s+((?:[A-Z][a-zA-Z]+)(?:\s+[A-Z][a-zA-Z]+){0,3})", t)
+             or re.search(r"\b((?:[A-Z][a-zA-Z]+)(?:\s+[A-Z][a-zA-Z]+)?)\s+(?:trip|vacation|getaway|weekend)\b", t))
+        if m and m.group(1) not in {"I", "My", "Beach", "Road", "Work", "Business", "Girls"}:
+            data["location"] = m.group(1)
 
     # duration
     m = re.search(_NUM + r"[\s-]+(?:days?|nights?)\b", low)
@@ -83,33 +97,39 @@ def rule_parse(text: str) -> dict:
         data["duration_days"] = 2
 
     # outfits
-    plural = re.search(_NUM + r"\s+(?:\w+\s+)?outfits\b", low)
-    single = re.search(_NUM + r"\s+(?:\w+\s+)?outfit\b", low)
+    plural = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfits|looks|fits|sets|outfit ideas)\b", low)
+    single = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfit|look)\b", low)
     m = plural or single
     if m and _num(m.group(1)):
         data["number_of_outfits"] = _num(m.group(1))
 
-    # per-outfit budget
+    # total budget (checked first so "under 50$ total budget is 500$" reads 500 as the total)
     for pat in [
-        r"(?:each|per|every)\s+outfit[^.$\d]{0,40}?(?:" + _MONEY + r")",
-        r"(?:" + _MONEY + r")\s*(?:per|each|an?|for each)\s*outfit",
-        r"outfits?\s+(?:under|below|less than|max|up to)\s*(?:" + _MONEY + r")\s*each",
-    ]:
-        m = re.search(pat, low)
-        if m:
-            data["per_outfit_budget"] = _money(m)
-            break
-
-    # total budget
-    for pat in [
-        r"total\s+(?:budget|spend|spending)?[^.$\d]{0,25}?(?:" + _MONEY + r")",
-        r"(?:" + _MONEY + r")\s*(?:in\s+)?total",
-        r"(?:overall|whole trip|entire trip)[^.$\d]{0,25}?(?:" + _MONEY + r")",
-        r"budget (?:is|of)\s*(?:" + _MONEY + r")(?![^.]*outfit)",
+        r"total(?:\s+\w+){0,3}?\s+(?:budget|spend(?:ing)?|cost)\s*(?:is|of|=|:|would be|should be)?\s*"
+        r"(?:around|about|up to|under|max(?:imum)?|at most)?\s*(?:" + _AMT + r")",
+        r"total\s+(?:of\s+|is\s+)?(?:" + _AMT + r")",
+        r"(?:" + _MONEY + r")\s*(?:in\s+)?total\b",
+        r"\b" + _N + r"\s+(?:in\s+)?total\b",
+        r"(?:overall|whole trip|entire trip)[^.$\d]{0,25}?(?:" + _AMT + r")",
+        r"budget\s+(?:is|of)\s*(?:" + _MONEY + r")(?![^.]*outfit)",
     ]:
         m = re.search(pat, low)
         if m:
             data["total_budget"] = _money(m)
+            break
+
+    # per-outfit budget
+    for pat in [
+        r"(?:each|per|every|an?)\s+outfit[^.\d$]{0,40}?(?:" + _AMT + r")",
+        r"(?:" + _MONEY + r")\s*(?:per|each|an?|for each|/)\s*outfit",
+        r"outfits?\s+(?:that are\s+|each\s+)?(?:under|below|less than|max(?:imum)?|up to|at most|no more than|"
+        r"nothing over|not over)\s*(?:" + _AMT + r")",
+        r"(?:" + _MONEY + r")\s*each",
+        r"(?:nothing over|not over|under|max)\s*(?:" + _MONEY + r")\s*(?:each|apiece|a piece|per look|a look)",
+    ]:
+        m = re.search(pat, low)
+        if m and _money(m) != data.get("total_budget"):
+            data["per_outfit_budget"] = _money(m)
             break
 
     styles: list[str] = []

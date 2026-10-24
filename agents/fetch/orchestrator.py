@@ -14,7 +14,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 
-from uagents import Agent, Context
+from uagents import Context
 
 from agents import config
 from agents.core.bus import AgentUnavailable
@@ -22,9 +22,14 @@ from agents.core.engine import modify_shopping, plan_shopping
 from agents.fetch.messages import (AgentRestResponse, ConstraintCheckMsg, ConstraintResultMsg, HealthResponse,
                                    ModifyRestRequest, PlanRestRequest, SearchRequestMsg, SearchResponseMsg,
                                    StyleRequestMsg, StyleResponseMsg)
+from agents.fetch.chat import build_chat_protocol
+from agents.fetch.factory import make_agent
 from agents.fetch.specialists import budget_agent, search_agent, style_agent
 
-orchestrator = Agent(name="orchestrator", seed=f"{config.AGENT_SEED_PREFIX}-orchestrator")
+orchestrator = make_agent(
+    "orchestrator", "orchestrator",
+    "Autonomous AI personal shopper: turns a natural-language trip/occasion request into complete outfits "
+    "from real products, enforces budgets, reuses your wardrobe and autonomously replans when constraints fail.")
 
 # request_id -> Future resolved when the specialist's reply arrives
 _PENDING: dict = {}
@@ -125,3 +130,9 @@ async def modify(ctx: Context, req: ModifyRestRequest) -> AgentRestResponse:
          "target_outfit_id": req.target_outfit_id},
         req.profile, req.wardrobe, bus=FetchBus(ctx))
     return AgentRestResponse(**result)
+
+
+# ASI:One / Agentverse chat (only on uagents versions that ship the chat protocol)
+_chat_proto = build_chat_protocol(lambda ctx: FetchBus(ctx))
+if _chat_proto is not None:
+    orchestrator.include(_chat_proto, publish_manifest=True)
