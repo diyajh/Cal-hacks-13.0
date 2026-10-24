@@ -15,8 +15,9 @@ export interface Outfit {
   products: Product[]; newSpend: number; whyItWorks: string; accent: string
 }
 export interface AgentEvent { id: string; agent: string; title: string; detail: string; status: 'done' | 'active' }
+export interface SessionConflict { status: 'needs_user_input' | string; message: string; conflictingConstraints: string[]; options: Array<string | { label?: string; value?: string; message?: string }> }
 export interface StyleSession {
   session: string; parsedRequest: ParsedRequest; styleDNA: StyleDNA[]; outfits: Outfit[]
   totalCost: number; newPurchaseCost: number; ownedItems: Product[]; reusedItems: Product[]
-  agentEvents: AgentEvent[]; constraintStatus: 'satisfied' | 'conflict'
+  agentEvents: AgentEvent[]; constraintStatus: 'satisfied' | 'conflict'; conflict?: SessionConflict
 }

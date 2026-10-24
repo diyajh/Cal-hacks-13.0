@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from .config import load_settings
 from .agents_client import AgentsClient, AgentsUnavailableError
-from .schemas import TranscriptionResponse, VoiceTurnRequest, VoiceTurnResponse
+from .schemas import TranscriptionResponse, VoiceSpeakRequest, VoiceTurnRequest, VoiceTurnResponse
 from .session_mapper import to_style_session
 from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 
@@ -105,6 +105,15 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
         agent_events=agent_events,
         style_session=style_session,
     )
+
+
+@app.post("/api/voice-sessions/{session_id}/speak")
+async def speak_voice_response(session_id: str, request: VoiceSpeakRequest) -> dict[str, object]:
+    try:
+        speech = await CartesiaVoiceGateway(settings).synthesize(request.text)
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    return {"session_id": session_id, "audio_data_url": speech.audio_data_url, "provider": "cartesia"}
 
 
 @app.post("/api/voice-sessions/{session_id}/transcribe", response_model=TranscriptionResponse)
