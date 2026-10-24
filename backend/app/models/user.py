@@ -1,22 +1,23 @@
 from datetime import datetime
+from typing import List, Optional
 from typing import Literal
 from pydantic import BaseModel
 
 
 class UserProfile(BaseModel):
-    preferred_styles: list[str] = []
-    preferred_colors: list[str] = []
-    avoided_styles: list[str] = []
-    avoided_colors: list[str] = []
-    typical_budget: float | None = None
-    preference_tags: list[str] = []
+    preferred_styles: List[str] = []
+    preferred_colors: List[str] = []
+    avoided_styles: List[str] = []
+    avoided_colors: List[str] = []
+    typical_budget: Optional[float] = None
+    preference_tags: List[str] = []
 
 
 class WardrobeItem(BaseModel):
-    id: str | None = None
+    id: Optional[str] = None
     name: str
-    category: str | None = None
-    colors: list[str] = []
-    tags: list[str] = []
+    category: Optional[str] = None
+    colors: List[str] = []
+    tags: List[str] = []
     memory_type: Literal["temporary", "remembered"] = "temporary"
-    expires_at: datetime | None = None
+    expires_at: Optional[datetime] = None

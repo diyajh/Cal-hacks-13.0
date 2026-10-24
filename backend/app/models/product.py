@@ -1,26 +1,27 @@
 from pydantic import BaseModel
+from typing import List, Optional
 
 
 class Product(BaseModel):
     id: str
     name: str
-    category: str | None = None
+    category: Optional[str] = None
     price: float
     currency: str = "USD"
     retailer: str
-    image_url: str | None = None
+    image_url: Optional[str] = None
     product_url: str
-    description: str | None = None
-    colors: list[str] = []
-    tags: list[str] = []
+    description: Optional[str] = None
+    colors: List[str] = []
+    tags: List[str] = []
     available: bool = True
     source: str
 
 
 class ProductSearchRequest(BaseModel):
     query: str
-    category: str | None = None
-    colors: list[str] = []
-    tags: list[str] = []
-    max_price: float | None = None
+    category: Optional[str] = None
+    colors: List[str] = []
+    tags: List[str] = []
+    max_price: Optional[float] = None
     limit: int = 20

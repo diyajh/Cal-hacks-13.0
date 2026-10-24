@@ -2,11 +2,13 @@ import httpx
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 
 from app.routes.users import profiles, wardrobes
+from app.config import load_settings
 
 router = APIRouter(prefix="/shopping")
-AGENTS_URL = "http://localhost:8001"
+AGENTS_URL = load_settings().agents_base_url
 
 
 class PlanRequest(BaseModel):
@@ -19,7 +21,7 @@ class ModifyRequest(BaseModel):
     session_id: str
     user_id: str
     message: str
-    target_outfit_id: str | None = None
+    target_outfit_id: Optional[str] = None
 
 
 @router.post("/plan")
