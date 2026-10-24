@@ -15,6 +15,7 @@ async def search_products(req: ProductSearchRequest):
     try:
         products = await search_apify(
             req.query,
+            req.category,
             req.max_price,
             req.limit
         )

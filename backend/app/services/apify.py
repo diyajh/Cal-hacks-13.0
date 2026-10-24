@@ -17,7 +17,7 @@ def price_to_float(price):
     return float(match.group().replace(",", "")) if match else None
 
 
-async def search_apify(query, max_price=None, limit=10):
+async def search_apify(query, category=None, max_price=None, limit=10):
     url = f"https://api.apify.com/v2/acts/{ACTOR}/run-sync-get-dataset-items"
 
     data = {
@@ -54,7 +54,7 @@ async def search_apify(query, max_price=None, limit=10):
         products.append({
             "id": item.get("product_id") or str(len(products)),
             "name": item.get("product_title") or "Unknown Product",
-            "category": None,
+            "category": category,
             "price": price,
             "currency": "USD",
             "retailer": item.get("store_name") or "Unknown",
