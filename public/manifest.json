@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Aura — personal shopping agent",
+  "version": "0.1.0",
+  "description": "Plan constrained shopping looks with Fetch.ai agents and Cartesia voice.",
+  "action": { "default_title": "Open Aura" },
+  "side_panel": { "default_path": "index.html" },
+  "permissions": ["activeTab", "sidePanel", "storage", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

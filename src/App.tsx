@@ -4,6 +4,7 @@ import { Outfit, Product } from './types'
 import { apiConfigured, createStyleSession, loadDemoOrApiSession, modifyStyleSession, sendVoiceTurn, transcribeVoiceAudio } from './api/client'
 import { BrowserSpeechRecognition, createSpeechRecognition } from './voice'
 import { VoiceAgentState, VoiceTurn } from './voiceAgent'
+import { addPageContext, getActivePageContext } from './extensionBridge'
 
 const money = (n: number) => `$${n}`
 const demoVoiceRequest = "I'm going to San Diego for five days. I need five outfits under $50 each and my total budget under $500. I want a beachy neutral aesthetic. One outfit needs a crochet top and skirt. I already own white sneakers, so use them. I hate neon colors."
@@ -45,7 +46,7 @@ function App() {
   }, [])
   const submit = async () => {
     if (!input.trim()) return
-    const prompt = input.trim()
+    const prompt = addPageContext(input.trim(), await getActivePageContext())
     setSubmitted(true)
     setInput('')
     const isVoiceTurn = voiceState === 'heard' && Boolean(voiceTranscript)
