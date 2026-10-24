@@ -71,7 +71,9 @@ def show(status: int, data: dict, secs: float, path: str) -> None:
     agents = sorted({e["agent"] for e in events})
     parsed = next((e["message"] for e in events if e["type"] == "request_parsed"), "")
     searches = [e["message"] for e in events if e["type"] == "search_completed"]
-    live = sum("live product service" in m for m in searches)
+    cached = sum("(cached)" in m for m in searches)
+    live = sum("live product service" in m for m in searches) - cached
+    failed = sum("live search failed" in m for m in searches)
     local_mode = any(e["type"] == "mode" for e in events)
     print(f"\n{BOLD}--- API calls made ---{RESET}")
     print(f"  HTTP POST {BASE}{path} -> {status} in {secs:.1f}s")
@@ -80,8 +82,13 @@ def show(status: int, data: dict, secs: float, path: str) -> None:
     if path == "/plan":
         llm = parsed.startswith("Parsed with LLM")
         print(f"  LLM API for parsing: {GREEN + 'yes' + RESET if llm else 'no (rule-based parser; add a key to .env)'}")
-    print(f"  Product searches: {len(searches)} "
-          f"({live} live product service, {len(searches) - live} fallback catalog)")
+    print(f"  Product searches: {len(searches)} ({live} live Apify via Person 2, {cached} from cache, "
+          f"{len(searches) - live - cached} fallback{', ' + str(failed) + ' FAILED' if failed else ''})")
+    plan_products = [i["product"] for o in rec["outfits"] for i in o["items"] if i["product"]]
+    if plan_products:
+        srcs = sorted({str(p.get("source")) for p in plan_products})
+        shops = sorted({p["retailer"] for p in plan_products if p.get("retailer")})
+        print(f"  Products in this plan: source={', '.join(srcs)}  retailers={', '.join(shops)}")
 
 
 def main() -> None:

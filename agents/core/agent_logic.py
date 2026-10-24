@@ -5,7 +5,7 @@ from __future__ import annotations
 from agents.core import taxonomy as tx
 from agents.core.contract import make_event, make_violation
 from agents.core.scoring import build_context, score_item
-from agents.products.client import search_products
+from agents.products.client import SOURCE_LABELS, search_products
 
 SEARCH, STYLE, BUDGET = "search_agent", "style_agent", "budget_agent"
 
@@ -25,14 +25,23 @@ def search_agent_handle(session_id: str, search_request: dict, reason: str = "",
     events.append(make_event(session_id, SEARCH, "search_started",
                              f"Searching for {desc}" + (f" ({reason})" if reason else ""), "working", outfit_id))
     try:
-        products, source = search_products(search_request)
+        products, source, stats = search_products(search_request)
     except Exception as exc:  # never crash the agent; report honestly
         events.append(make_event(session_id, SEARCH, "search_completed", f"Search failed: {exc}", "failed", outfit_id))
         return [], events
-    src = "live product service" if source == "product_service" else "fallback catalog"
-    events.append(make_event(session_id, SEARCH, "search_completed",
-                             f"Found {len(products)} products for '{search_request['query']}' from {src}",
-                             "completed", outfit_id))
+    src = SOURCE_LABELS.get(source, source)
+    msg = f"Found {len(products)} products for '{search_request['query']}' from {src}"
+    retailers = sorted({p["retailer"] for p in products if p.get("retailer")})
+    if retailers and source in ("product_service", "cache"):
+        msg += f" ({', '.join(retailers[:4])}{'…' if len(retailers) > 4 else ''})"
+    dropped = {k: v for k, v in stats.items() if k not in ("received", "kept") and isinstance(v, int) and v}
+    if dropped:
+        msg += " — filtered out " + ", ".join(f"{v} {k.replace('_', ' ')}" for k, v in dropped.items())
+    status = "completed"
+    if stats.get("error"):
+        msg += f" — live search failed ({stats['error'][:120]})"
+        status = "failed" if source == "none" else "completed"
+    events.append(make_event(session_id, SEARCH, "search_completed", msg, status, outfit_id))
     return products, events
 
 

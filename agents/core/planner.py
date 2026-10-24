@@ -397,10 +397,21 @@ class TripPlanner:
             o["excluded"].append(cur["item"]["id"])
 
         mods = style_modifiers if style_modifiers is not None else o.get("style_modifiers")
-        await self._search(self._base_search(kind or CAT_QUERY[slot], slot, max_price=max_price, extra_style=mods),
-                           "replacement search", o["id"])
         await self._style(list(self.pool.values()) + self.wardrobe, [self.ctx_key(o)], o["id"])
         cands = self._candidates(o, slot, max_price=max_price, marginal=marginal)
+        if cands and not mods and config.REPLAN_SEARCH != "always":
+            # Cost/latency saver: products already retrieved this session can satisfy it, so skip a
+            # new live (paid) search. Style-change requests always search for fresh options.
+            n = sum(1 for c in cands if not c[3])
+            owned = [c[2]["name"] for c in cands if c[3]]
+            have = (f"{n} already-retrieved {what} under {_usd(max_price)}" if n else "") + \
+                   (" and " if n and owned else "") + (f"your own {owned[0]}" if owned else "")
+            self.ev("replanning", f"{have} can fill it — no new search needed.", o["id"], status="working")
+        else:
+            await self._search(self._base_search(kind or CAT_QUERY[slot], slot, max_price=max_price, extra_style=mods),
+                               "replacement search", o["id"])
+            await self._style(list(self.pool.values()) + self.wardrobe, [self.ctx_key(o)], o["id"])
+            cands = self._candidates(o, slot, max_price=max_price, marginal=marginal)
         if prefer_cheapest:
             cands.sort(key=lambda x: (x[2].get("price") or 0) if not x[3] else -1)
         if not cands:

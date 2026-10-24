@@ -195,6 +195,11 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
 
     conflict = _conflict(remaining, request, planner) if remaining else None
     rec = _finalize(planner, request, events, remaining, session_id, conflict)
+    if not planner.pool and any("live search failed" in e["message"] for e in events):
+        # nothing could be retrieved at all: this is a service outage, not a constraint conflict
+        rec.update(status="failed", message="I couldn't reach the product search service, so I can't build outfits "
+                                            "right now. Please try again in a moment.")
+        conflict = None
     events.append(make_event(session_id, ORCH, "plan_completed" if not remaining else "conflict", rec["message"],
                              "completed" if not remaining else "failed"))
     save_session(session_id, {"request": request, "profile": profile, "wardrobe": wardrobe_all,

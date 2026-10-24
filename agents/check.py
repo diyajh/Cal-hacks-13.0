@@ -11,6 +11,9 @@ Run from the repo root (no installs needed — uses the local bus + mock catalog
   python -m agents.check conflict                      # impossible request -> needs_user_input
   python -m agents.check chat "5 days in San Diego, 5 outfits under $50 each"   # reply an ASI:One user would see
   python -m agents.check chat "make day 2 more elegant" --user me                # follow-up in same chat
+  python -m agents.check llm "Heading to Tulum, 3 looks, nothing over 40 bucks"   # is the LLM path working?
+  python -m agents.check live "beachy crochet top" --category top --max 50       # ONE real call to Person 2
+  python -m agents.check cache-clear                    # forget cached live searches
   python -m agents.check all                           # every check with PASS/FAIL
 """
 from __future__ import annotations
@@ -130,6 +133,39 @@ def cmd_chat(text, user):
     print(asyncio.run(handle_chat_text(text, f"agent1q-local-{user}", LocalBus())))
 
 
+def cmd_llm(text):
+    from agents import config
+    from agents.core.llm import LAST, llm_available
+    hdr("LLM PARSER CHECK")
+    if not llm_available():
+        print("  No ANTHROPIC_API_KEY / OPENAI_API_KEY in .env -> rule-based parser only.")
+        return
+    out = parse_request(text, SESSION, "user_123", use_llm=True)
+    print(f"  provider={LAST['provider']}  model={LAST['model']}  used_llm={out['used_llm']}")
+    if not out["used_llm"]:
+        print(f"  LLM FAILED -> rules fallback. Error: {LAST['error']}")
+        print("  Fix: check the key, credits, or set LLM_MODEL in .env to a model your key can use.")
+    print(json.dumps({k: out["request"][k] for k in ("location", "duration_days", "number_of_outfits",
+          "per_outfit_budget", "total_budget", "styles", "preferred_colors", "avoid", "required_items",
+          "occasions")}, indent=2))
+
+
+def cmd_live(query, category, max_price):
+    from agents import config
+    from agents.products.client import SOURCE_LABELS, search_products
+    if not config.PRODUCT_SEARCH_URL:
+        print("PRODUCT_SEARCH_URL is not set in .env")
+        return
+    req = make_search_request(query, category, [], [], max_price, 20)
+    hdr(f"ONE live search -> {config.PRODUCT_SEARCH_URL}")
+    print(json.dumps(req))
+    products, source, stats = search_products(req)
+    print(f"\n  source: {SOURCE_LABELS.get(source, source)}   stats: {stats}")
+    for p in products[:20]:
+        print(f"  ${p['price']:>7.2f}  {p['category']:<7} {str(p['retailer'])[:14]:<14} {p['name'][:60]}"
+              f"  url={'yes' if p['product_url'] else 'NO'} img={'yes' if p['image_url'] else 'NO'} src={p['source']}")
+
+
 def cmd_all():
     results = []
 
@@ -194,6 +230,9 @@ def main():
     p = sub.add_parser("plan"); p.add_argument("--agent"); p.add_argument("--text", default=CANONICAL)
     p = sub.add_parser("modify"); p.add_argument("message")
     sub.add_parser("conflict")
+    p = sub.add_parser("llm"); p.add_argument("text", nargs="?", default="Heading to Tulum for a long weekend, need 3 looks, nothing over 40 bucks each, into boho stuff but hate anything yellow")
+    p = sub.add_parser("live"); p.add_argument("query"); p.add_argument("--category"); p.add_argument("--max", type=float)
+    sub.add_parser("cache-clear")
     p = sub.add_parser("chat"); p.add_argument("text"); p.add_argument("--user", default="demo")
     sub.add_parser("all")
     a = ap.parse_args()
@@ -207,6 +246,13 @@ def main():
         cmd_plan(a.agent, a.text)
     elif a.cmd == "modify":
         cmd_modify(a.message)
+    elif a.cmd == "llm":
+        cmd_llm(a.text)
+    elif a.cmd == "live":
+        cmd_live(a.query, a.category, a.max)
+    elif a.cmd == "cache-clear":
+        from agents.products.client import clear_cache
+        print(f"removed {clear_cache()} cached searches")
     elif a.cmd == "chat":
         cmd_chat(a.text, a.user)
     elif a.cmd == "conflict":
