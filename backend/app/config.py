@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 import os
+from typing import Optional
 
 
 @dataclass(frozen=True)
 class Settings:
-    cartesia_api_key: str | None
+    cartesia_api_key: Optional[str]
     cartesia_version: str
     cartesia_stt_model: str
     cartesia_tts_model: str

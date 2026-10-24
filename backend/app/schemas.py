@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Literal, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -27,7 +27,7 @@ class VoiceTurnResponse(BaseModel):
     session_id: str
     transcript: str
     response_text: str
-    audio_url: str | None = None
+    audio_url: Optional[str] = None
     agent_events: list[AgentEvent] = Field(default_factory=list)
     provider: Literal["cartesia"]
     status: Literal["accepted", "completed"]
