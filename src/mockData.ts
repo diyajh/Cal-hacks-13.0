@@ -11,13 +11,13 @@ const img = {
 }
 
 const products: Record<string, Product> = {
-  crochet: { id: 'crochet', name: 'Mira Crochet Tank', retailer: 'Reformation', price: 28, category: 'top', image: img.crochet, link: '#', match: 97, note: 'Required detail' },
-  skirt: { id: 'skirt', name: 'Linen Bias Midi Skirt', retailer: 'Everlane', price: 20, category: 'bottom', image: img.skirt, link: '#', match: 95, note: 'Replacement found' },
-  linen: { id: 'linen', name: 'Relaxed Linen Shirt', retailer: 'Quince', price: 24, category: 'top', image: img.linen, link: '#', match: 93 },
-  pants: { id: 'pants', name: 'Cream Wide-Leg Trouser', retailer: 'Abercrombie', price: 18, category: 'bottom', image: img.pants, link: '#', match: 91 },
-  dress: { id: 'dress', name: 'Soleil Cotton Dress', retailer: 'Faithfull', price: 38, category: 'dress', image: img.dress, link: '#', match: 94, note: 'Easy one-piece' },
+  crochet: { id: 'crochet', name: 'Mira Crochet Tank', retailer: 'Reformation', price: 28, category: 'top', image: img.crochet, link: 'https://www.thereformation.com/search?q=Mira%20Crochet%20Tank', match: 97, note: 'Required detail' },
+  skirt: { id: 'skirt', name: 'Linen Bias Midi Skirt', retailer: 'Everlane', price: 20, category: 'bottom', image: img.skirt, link: 'https://www.everlane.com/search?q=Linen%20Bias%20Midi%20Skirt', match: 95, note: 'Replacement found' },
+  linen: { id: 'linen', name: 'Relaxed Linen Shirt', retailer: 'Quince', price: 24, category: 'top', image: img.linen, link: 'https://www.quince.com/search?q=Relaxed%20Linen%20Shirt', match: 93 },
+  pants: { id: 'pants', name: 'Cream Wide-Leg Trouser', retailer: 'Abercrombie', price: 18, category: 'bottom', image: img.pants, link: 'https://www.abercrombie.com/shop/us/search?searchTerm=Cream%20Wide-Leg%20Trouser', match: 91 },
+  dress: { id: 'dress', name: 'Soleil Cotton Dress', retailer: 'Faithfull', price: 38, category: 'dress', image: img.dress, link: 'https://faithfullthebrand.com/search?q=Soleil%20Cotton%20Dress', match: 94, note: 'Easy one-piece' },
   sneakers: { id: 'sneakers', name: 'White Leather Sneakers', retailer: 'Your wardrobe', price: 0, category: 'shoes', image: img.sneakers, link: '#', match: 100, owned: true, note: 'Already owned' },
-  bag: { id: 'bag', name: 'Woven Market Tote', retailer: 'Madewell', price: 12, category: 'accessory', image: img.bag, link: '#', match: 89 },
+  bag: { id: 'bag', name: 'Woven Market Tote', retailer: 'Madewell', price: 12, category: 'accessory', image: img.bag, link: 'https://www.madewell.com/search?q=Woven%20Market%20Tote', match: 89 },
 }
 
 const outfit = (o: Outfit): Outfit => o
