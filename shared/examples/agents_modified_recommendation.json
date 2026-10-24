@@ -1,0 +1,868 @@
+{
+  "session_id": "session_demo",
+  "status": "completed",
+  "parsed_request": {
+    "session_id": "session_demo",
+    "user_id": "user_123",
+    "raw_request": "I'm going to San Diego for five days. I need five outfits. Each outfit should be under $50 and my total budget is $500. I want a beachy neutral aesthetic. One outfit needs a crochet top and skirt. I like beige and white. I don't like neon colors. I already own white sneakers. Remember that I own them.",
+    "location": "San Diego",
+    "duration_days": 5,
+    "number_of_outfits": 5,
+    "occasions": [
+      "beach",
+      "brunch",
+      "sightseeing",
+      "dinner"
+    ],
+    "styles": [
+      "beachy",
+      "coastal"
+    ],
+    "preferred_colors": [
+      "neutral",
+      "beige",
+      "white"
+    ],
+    "avoid": [
+      "neon"
+    ],
+    "required_items": [
+      {
+        "item": "crochet top",
+        "quantity": 1,
+        "required_for_outfit": null
+      },
+      {
+        "item": "skirt",
+        "quantity": 1,
+        "required_for_outfit": null
+      }
+    ],
+    "per_outfit_budget": 50.0,
+    "total_budget": 500.0,
+    "currency": "USD",
+    "owned_item_references": [
+      "wardrobe_white_sneakers"
+    ],
+    "additional_preferences": [],
+    "hard_constraints": [
+      "per_outfit_budget",
+      "total_budget",
+      "number_of_outfits",
+      "required_items"
+    ],
+    "soft_preferences": [
+      "styles",
+      "preferred_colors",
+      "occasions"
+    ]
+  },
+  "outfits": [
+    {
+      "id": "outfit_1",
+      "title": "Beachy Beach Day",
+      "day": 1,
+      "occasion": "beach",
+      "match_score": 88,
+      "score_breakdown": {
+        "style": 83,
+        "color": 100,
+        "occasion": 85,
+        "budget": 100,
+        "preference": 75
+      },
+      "items": [
+        {
+          "id": "outfit_item_1",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_002",
+            "name": "Beige Crochet Tank",
+            "category": "top",
+            "subcategory": "crochet_top",
+            "price": 18.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Relaxed crochet tank in a sandy beige.",
+            "colors": [
+              "beige"
+            ],
+            "tags": [
+              "crochet",
+              "beach",
+              "summer",
+              "boho"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_002"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_5"
+          ]
+        },
+        {
+          "id": "outfit_item_2",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_014",
+            "name": "Sand Gauze Midi Skirt",
+            "category": "bottom",
+            "subcategory": "skirt",
+            "price": 21.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Tiered gauze midi skirt.",
+            "colors": [
+              "sand"
+            ],
+            "tags": [
+              "boho",
+              "breezy",
+              "beach",
+              "summer"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_014"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_1"
+          ]
+        },
+        {
+          "id": "outfit_item_6",
+          "source_type": "wardrobe",
+          "product": null,
+          "wardrobe_item": {
+            "id": "wardrobe_white_sneakers",
+            "user_id": "user_123",
+            "name": "White Sneakers",
+            "category": "shoes",
+            "subcategory": "sneakers",
+            "colors": [
+              "white"
+            ],
+            "tags": [],
+            "image_url": null,
+            "estimated_value": null,
+            "memory_type": "remembered",
+            "created_at": "2026-10-24T05:05:55Z",
+            "expires_at": null
+          },
+          "purchase_required": false,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_2",
+            "outfit_3",
+            "outfit_4"
+          ]
+        }
+      ],
+      "total_value": 39.0,
+      "new_purchase_cost": 39.0,
+      "why_it_works": "Built for beach with the beachy and coastal look you asked for \u2014 beach, boho and breezy details carry the vibe. It stays in your beige, sand and white palette. Includes your requested crochet top and skirt. Your own White Sneakers completes it at no extra cost. Beige Crochet Tank is reused in other outfits, so you only buy it once. New purchases: $39.00 of your $50.00 per-outfit budget.",
+      "constraints_satisfied": true
+    },
+    {
+      "id": "outfit_2",
+      "title": "Coastal Brunch",
+      "day": 2,
+      "occasion": "brunch",
+      "match_score": 84,
+      "score_breakdown": {
+        "style": 72,
+        "color": 100,
+        "occasion": 80,
+        "budget": 100,
+        "preference": 75
+      },
+      "items": [
+        {
+          "id": "outfit_item_9",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_005",
+            "name": "White Ribbed Tank Top",
+            "category": "top",
+            "subcategory": "tank",
+            "price": 12.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Everyday ribbed cotton tank.",
+            "colors": [
+              "white"
+            ],
+            "tags": [
+              "basic",
+              "minimal",
+              "casual",
+              "summer"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_005"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_2"
+          ]
+        },
+        {
+          "id": "outfit_item_5",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_016",
+            "name": "Cream Linen Shorts",
+            "category": "bottom",
+            "subcategory": "shorts",
+            "price": 19.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "High-waisted linen shorts.",
+            "colors": [
+              "cream"
+            ],
+            "tags": [
+              "linen",
+              "beach",
+              "summer",
+              "casual",
+              "coastal"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_016"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_2",
+            "outfit_5"
+          ]
+        },
+        {
+          "id": "outfit_item_6",
+          "source_type": "wardrobe",
+          "product": null,
+          "wardrobe_item": {
+            "id": "wardrobe_white_sneakers",
+            "user_id": "user_123",
+            "name": "White Sneakers",
+            "category": "shoes",
+            "subcategory": "sneakers",
+            "colors": [
+              "white"
+            ],
+            "tags": [],
+            "image_url": null,
+            "estimated_value": null,
+            "memory_type": "remembered",
+            "created_at": "2026-10-24T05:05:55Z",
+            "expires_at": null
+          },
+          "purchase_required": false,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_2",
+            "outfit_3",
+            "outfit_4"
+          ]
+        }
+      ],
+      "total_value": 31.0,
+      "new_purchase_cost": 31.0,
+      "why_it_works": "Built for brunch with the beachy and coastal look you asked for \u2014 beach, coastal and linen details carry the vibe. It stays in your cream and white palette. Your own White Sneakers completes it at no extra cost. Cream Linen Shorts is reused in other outfits, so you only buy it once. New purchases: $31.00 of your $50.00 per-outfit budget.",
+      "constraints_satisfied": true
+    },
+    {
+      "id": "outfit_3",
+      "title": "Elegant Sightseeing Day",
+      "day": 3,
+      "occasion": "sightseeing",
+      "match_score": 77,
+      "score_breakdown": {
+        "style": 59,
+        "color": 100,
+        "occasion": 65,
+        "budget": 100,
+        "preference": 75
+      },
+      "items": [
+        {
+          "id": "outfit_item_4",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_004",
+            "name": "Natural Linen Button-Down Shirt",
+            "category": "top",
+            "subcategory": "shirt",
+            "price": 29.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Oversized linen shirt, great as a cover-up.",
+            "colors": [
+              "natural",
+              "beige"
+            ],
+            "tags": [
+              "linen",
+              "coastal",
+              "beach",
+              "casual",
+              "summer"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_004"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_3"
+          ]
+        },
+        {
+          "id": "outfit_item_11",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_033",
+            "name": "Ivory Pleated Satin Midi Skirt",
+            "category": "bottom",
+            "subcategory": "skirt",
+            "price": 20.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Softly pleated satin midi skirt that dresses up any top.",
+            "colors": [
+              "ivory"
+            ],
+            "tags": [
+              "satin",
+              "elegant",
+              "midi",
+              "dinner",
+              "chic"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_033"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_3"
+          ]
+        },
+        {
+          "id": "outfit_item_6",
+          "source_type": "wardrobe",
+          "product": null,
+          "wardrobe_item": {
+            "id": "wardrobe_white_sneakers",
+            "user_id": "user_123",
+            "name": "White Sneakers",
+            "category": "shoes",
+            "subcategory": "sneakers",
+            "colors": [
+              "white"
+            ],
+            "tags": [],
+            "image_url": null,
+            "estimated_value": null,
+            "memory_type": "remembered",
+            "created_at": "2026-10-24T05:05:55Z",
+            "expires_at": null
+          },
+          "purchase_required": false,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_2",
+            "outfit_3",
+            "outfit_4"
+          ]
+        }
+      ],
+      "total_value": 49.0,
+      "new_purchase_cost": 49.0,
+      "why_it_works": "Built for sightseeing with the beachy and coastal look you asked for \u2014 beach, coastal and linen details carry the vibe. It stays in your beige, ivory and natural palette. Your own White Sneakers completes it at no extra cost. New purchases: $49.00 of your $50.00 per-outfit budget.",
+      "constraints_satisfied": true
+    },
+    {
+      "id": "outfit_4",
+      "title": "Coastal Dinner Out",
+      "day": 4,
+      "occasion": "dinner",
+      "match_score": 77,
+      "score_breakdown": {
+        "style": 50,
+        "color": 100,
+        "occasion": 78,
+        "budget": 100,
+        "preference": 75
+      },
+      "items": [
+        {
+          "id": "outfit_item_7",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_024",
+            "name": "Black Wrap Midi Dress",
+            "category": "dress",
+            "subcategory": "wrap_dress",
+            "price": 39.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Wrap midi dress with flutter sleeves.",
+            "colors": [
+              "black"
+            ],
+            "tags": [
+              "elegant",
+              "dinner",
+              "evening",
+              "classic",
+              "wrap"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_024"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_4"
+          ]
+        },
+        {
+          "id": "outfit_item_6",
+          "source_type": "wardrobe",
+          "product": null,
+          "wardrobe_item": {
+            "id": "wardrobe_white_sneakers",
+            "user_id": "user_123",
+            "name": "White Sneakers",
+            "category": "shoes",
+            "subcategory": "sneakers",
+            "colors": [
+              "white"
+            ],
+            "tags": [],
+            "image_url": null,
+            "estimated_value": null,
+            "memory_type": "remembered",
+            "created_at": "2026-10-24T05:05:55Z",
+            "expires_at": null
+          },
+          "purchase_required": false,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_2",
+            "outfit_3",
+            "outfit_4"
+          ]
+        }
+      ],
+      "total_value": 39.0,
+      "new_purchase_cost": 39.0,
+      "why_it_works": "Built for dinner with the beachy and coastal look you asked for. It stays in your black and white palette. Your own White Sneakers completes it at no extra cost. New purchases: $39.00 of your $50.00 per-outfit budget.",
+      "constraints_satisfied": true
+    },
+    {
+      "id": "outfit_5",
+      "title": "Beachy Beach Day",
+      "day": 5,
+      "occasion": "beach",
+      "match_score": 94,
+      "score_breakdown": {
+        "style": 93,
+        "color": 100,
+        "occasion": 100,
+        "budget": 100,
+        "preference": 75
+      },
+      "items": [
+        {
+          "id": "outfit_item_1",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_002",
+            "name": "Beige Crochet Tank",
+            "category": "top",
+            "subcategory": "crochet_top",
+            "price": 18.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Relaxed crochet tank in a sandy beige.",
+            "colors": [
+              "beige"
+            ],
+            "tags": [
+              "crochet",
+              "beach",
+              "summer",
+              "boho"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_002"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_1",
+            "outfit_5"
+          ]
+        },
+        {
+          "id": "outfit_item_5",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_016",
+            "name": "Cream Linen Shorts",
+            "category": "bottom",
+            "subcategory": "shorts",
+            "price": 19.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "High-waisted linen shorts.",
+            "colors": [
+              "cream"
+            ],
+            "tags": [
+              "linen",
+              "beach",
+              "summer",
+              "casual",
+              "coastal"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_016"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": true,
+          "used_in_outfits": [
+            "outfit_2",
+            "outfit_5"
+          ]
+        },
+        {
+          "id": "outfit_item_10",
+          "source_type": "product",
+          "product": {
+            "id": "mock_prod_032",
+            "name": "Cream Woven Flip Flops",
+            "category": "shoes",
+            "subcategory": "sandals",
+            "price": 12.0,
+            "currency": "USD",
+            "retailer": "Mock Retailer",
+            "image_url": null,
+            "product_url": null,
+            "description": "Woven-strap flip flops.",
+            "colors": [
+              "cream"
+            ],
+            "tags": [
+              "beach",
+              "summer",
+              "woven",
+              "casual"
+            ],
+            "available": true,
+            "source": "mock",
+            "source_id": "mock_032"
+          },
+          "wardrobe_item": null,
+          "purchase_required": true,
+          "reused": false,
+          "used_in_outfits": [
+            "outfit_5"
+          ]
+        }
+      ],
+      "total_value": 49.0,
+      "new_purchase_cost": 49.0,
+      "why_it_works": "Built for beach with the beachy and coastal look you asked for \u2014 beach, boho and coastal details carry the vibe. It stays in your beige and cream palette. Beige Crochet Tank and Cream Linen Shorts are reused in other outfits, so you only buy them once. New purchases: $49.00 of your $50.00 per-outfit budget.",
+      "constraints_satisfied": true
+    }
+  ],
+  "total_new_purchase_cost": 170.0,
+  "total_budget": 500.0,
+  "owned_items_used": [
+    {
+      "id": "outfit_item_6",
+      "source_type": "wardrobe",
+      "product": null,
+      "wardrobe_item": {
+        "id": "wardrobe_white_sneakers",
+        "user_id": "user_123",
+        "name": "White Sneakers",
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          "white"
+        ],
+        "tags": [],
+        "image_url": null,
+        "estimated_value": null,
+        "memory_type": "remembered",
+        "created_at": "2026-10-24T05:05:55Z",
+        "expires_at": null
+      },
+      "purchase_required": false,
+      "reused": true,
+      "used_in_outfits": [
+        "outfit_1",
+        "outfit_2",
+        "outfit_3",
+        "outfit_4"
+      ]
+    }
+  ],
+  "reused_items": [
+    {
+      "id": "outfit_item_1",
+      "source_type": "product",
+      "product": {
+        "id": "mock_prod_002",
+        "name": "Beige Crochet Tank",
+        "category": "top",
+        "subcategory": "crochet_top",
+        "price": 18.0,
+        "currency": "USD",
+        "retailer": "Mock Retailer",
+        "image_url": null,
+        "product_url": null,
+        "description": "Relaxed crochet tank in a sandy beige.",
+        "colors": [
+          "beige"
+        ],
+        "tags": [
+          "crochet",
+          "beach",
+          "summer",
+          "boho"
+        ],
+        "available": true,
+        "source": "mock",
+        "source_id": "mock_002"
+      },
+      "wardrobe_item": null,
+      "purchase_required": true,
+      "reused": true,
+      "used_in_outfits": [
+        "outfit_1",
+        "outfit_5"
+      ]
+    },
+    {
+      "id": "outfit_item_6",
+      "source_type": "wardrobe",
+      "product": null,
+      "wardrobe_item": {
+        "id": "wardrobe_white_sneakers",
+        "user_id": "user_123",
+        "name": "White Sneakers",
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          "white"
+        ],
+        "tags": [],
+        "image_url": null,
+        "estimated_value": null,
+        "memory_type": "remembered",
+        "created_at": "2026-10-24T05:05:55Z",
+        "expires_at": null
+      },
+      "purchase_required": false,
+      "reused": true,
+      "used_in_outfits": [
+        "outfit_1",
+        "outfit_2",
+        "outfit_3",
+        "outfit_4"
+      ]
+    },
+    {
+      "id": "outfit_item_5",
+      "source_type": "product",
+      "product": {
+        "id": "mock_prod_016",
+        "name": "Cream Linen Shorts",
+        "category": "bottom",
+        "subcategory": "shorts",
+        "price": 19.0,
+        "currency": "USD",
+        "retailer": "Mock Retailer",
+        "image_url": null,
+        "product_url": null,
+        "description": "High-waisted linen shorts.",
+        "colors": [
+          "cream"
+        ],
+        "tags": [
+          "linen",
+          "beach",
+          "summer",
+          "casual",
+          "coastal"
+        ],
+        "available": true,
+        "source": "mock",
+        "source_id": "mock_016"
+      },
+      "wardrobe_item": null,
+      "purchase_required": true,
+      "reused": true,
+      "used_in_outfits": [
+        "outfit_2",
+        "outfit_5"
+      ]
+    }
+  ],
+  "agent_events": [
+    {
+      "id": "event_64143cc0",
+      "session_id": "session_demo",
+      "agent": "orchestrator",
+      "type": "modification_parsed",
+      "status": "completed",
+      "message": "Understood: target outfit_3; keep top; replace bottom; make it more elegant",
+      "outfit_id": null,
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_dc3d0141",
+      "session_id": "session_demo",
+      "agent": "style_agent",
+      "type": "style_evaluated",
+      "status": "completed",
+      "message": "Evaluated 34 products against your style profile; excluded 4 with avoided colors/styles. Top pick: Black Satin Cami (87/100)",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_1e4cca43",
+      "session_id": "session_demo",
+      "agent": "planner",
+      "type": "replanning",
+      "status": "working",
+      "message": "Replacing Sand Gauze Midi Skirt ($21.00) in Outfit 3 per your request (elegant); requesting bottoms under $21.00.",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_53159b16",
+      "session_id": "session_demo",
+      "agent": "search_agent",
+      "type": "search_started",
+      "status": "working",
+      "message": "Searching for elegant skirt shorts under $21.00 (replacement search)",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_e0c5d162",
+      "session_id": "session_demo",
+      "agent": "search_agent",
+      "type": "search_completed",
+      "status": "completed",
+      "message": "Found 5 products for 'elegant skirt shorts' from fallback catalog",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_e37b0736",
+      "session_id": "session_demo",
+      "agent": "planner",
+      "type": "replacement_found",
+      "status": "completed",
+      "message": "Swapped in Ivory Pleated Satin Midi Skirt ($20.00, style match 87/100) for Outfit 3. New outfit cost $49.00.",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_2ee266f5",
+      "session_id": "session_demo",
+      "agent": "budget_agent",
+      "type": "constraint_check",
+      "status": "completed",
+      "message": "Outfit 3: $49.00 \u2264 $50.00. Valid.",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_6b5af5e7",
+      "session_id": "session_demo",
+      "agent": "budget_agent",
+      "type": "constraint_check",
+      "status": "completed",
+      "message": "Trip total $170.00 (each item counted once) is within the $500.00 budget.",
+      "outfit_id": null,
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_52857051",
+      "session_id": "session_demo",
+      "agent": "planner",
+      "type": "outfit_accepted",
+      "status": "completed",
+      "message": "Outfit 3 accepted \u2014 Natural Linen Button-Down Shirt $29.00 + Ivory Pleated Satin Midi Skirt $20.00 + your White Sneakers",
+      "outfit_id": "outfit_3",
+      "timestamp": "2026-10-24T05:05:55Z"
+    },
+    {
+      "id": "event_5589c287",
+      "session_id": "session_demo",
+      "agent": "orchestrator",
+      "type": "plan_completed",
+      "status": "completed",
+      "message": "Updated outfit 3. New purchases total $170.00 of your $500.00 budget. I reused your White Sneakers instead of buying new.",
+      "outfit_id": null,
+      "timestamp": "2026-10-24T05:05:55Z"
+    }
+  ],
+  "constraint_violations": [],
+  "all_constraints_satisfied": true,
+  "message": "Updated outfit 3. New purchases total $170.00 of your $500.00 budget. I reused your White Sneakers instead of buying new."
+}
