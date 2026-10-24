@@ -14,5 +14,6 @@ export interface VoiceAgentResponse {
   responseText: string
   state: 'ready' | 'planning' | 'error'
   turns: VoiceTurn[]
-  agentEvents?: string[]
+  agentEvents?: unknown[]
+  audioDataUrl?: string
 }

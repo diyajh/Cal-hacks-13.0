@@ -28,6 +28,7 @@ class VoiceTurnResponse(BaseModel):
     transcript: str
     response_text: str
     audio_url: Optional[str] = None
+    audio_data_url: Optional[str] = None
     agent_events: list[AgentEvent] = Field(default_factory=list)
     provider: Literal["cartesia"]
     status: Literal["accepted", "completed"]

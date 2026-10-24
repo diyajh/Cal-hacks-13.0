@@ -41,10 +41,25 @@ export async function modifyStyleSession(sessionId: string, instruction: string)
 
 /** Cartesia stays server-side: the browser sends transcript text, never an API key. */
 export async function sendVoiceTurn(sessionId: string, transcript: string): Promise<VoiceAgentResponse> {
-  return request<VoiceAgentResponse>(`/api/voice-sessions/${encodeURIComponent(sessionId)}/turns`, {
+  const response = await request<{
+    session_id: string
+    transcript: string
+    response_text: string
+    audio_data_url?: string
+    agent_events?: unknown[]
+  }>(`/api/voice-sessions/${encodeURIComponent(sessionId)}/turns`, {
     method: 'POST',
     body: JSON.stringify({ session_id: sessionId, transcript }),
   })
+  return {
+    sessionId: response.session_id,
+    transcript: response.transcript,
+    responseText: response.response_text,
+    state: 'ready',
+    turns: [],
+    agentEvents: response.agent_events,
+    audioDataUrl: response.audio_data_url,
+  }
 }
 
 /** Mock-first loader used during parallel backend development. */

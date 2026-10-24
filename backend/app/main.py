@@ -34,7 +34,7 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
 
     gateway = CartesiaVoiceGateway(settings)
     try:
-        await gateway.transcribe_and_speak(request.transcript)
+        speech = await gateway.synthesize(request.transcript)
     except ProviderNotConfiguredError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
     except NotImplementedError as error:
@@ -44,6 +44,7 @@ async def voice_turn(session_id: str, request: VoiceTurnRequest) -> VoiceTurnRes
         session_id=session_id,
         transcript=request.transcript,
         response_text="Voice turn accepted.",
+        audio_data_url=speech.audio_data_url,
         provider="cartesia",
         status="completed",
         agent_events=[

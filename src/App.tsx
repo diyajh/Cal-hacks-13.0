@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { demoSession } from './mockData'
 import { Outfit, Product } from './types'
-import { apiConfigured, createStyleSession, loadDemoOrApiSession, modifyStyleSession } from './api/client'
+import { apiConfigured, createStyleSession, loadDemoOrApiSession, modifyStyleSession, sendVoiceTurn } from './api/client'
 import { BrowserSpeechRecognition, createSpeechRecognition } from './voice'
 import { VoiceAgentState, VoiceTurn } from './voiceAgent'
 
@@ -47,9 +47,30 @@ function App() {
     setInput('')
     const isVoiceTurn = voiceState === 'heard' && Boolean(voiceTranscript)
     if (isVoiceTurn) {
-      const responseText = 'I heard your San Diego trip brief. I’m checking your wardrobe, budget, and real product options now.'
-      setVoiceTurns(current => [...current, { id: `user-${Date.now()}`, role: 'user', text: prompt, createdAt: new Date().toISOString() }, { id: `assistant-${Date.now()}`, role: 'assistant', text: responseText, createdAt: new Date().toISOString() }])
-      speakFallback(responseText)
+      setVoiceState(apiConfigured ? 'thinking' : 'heard')
+      if (apiConfigured) {
+        try {
+          const response = await sendVoiceTurn(session.session, prompt)
+          const now = new Date().toISOString()
+          setVoiceTurns(current => [...current, { id: `user-${Date.now()}`, role: 'user', text: prompt, createdAt: now }, { id: `assistant-${Date.now()}`, role: 'assistant', text: response.responseText, createdAt: now, audioUrl: response.audioDataUrl }])
+          if (response.audioDataUrl) {
+            const audio = new Audio(response.audioDataUrl)
+            audio.onplay = () => { setIsSpeaking(true); setVoiceState('speaking') }
+            audio.onended = () => { setIsSpeaking(false); setVoiceState('heard') }
+            audio.onerror = () => { setIsSpeaking(false); setVoiceState('error'); setVoiceError('Aura received the response, but audio playback failed.') }
+            await audio.play()
+          } else {
+            speakFallback(response.responseText)
+          }
+        } catch {
+          setVoiceState('error')
+          setVoiceError('Aura voice backend is unavailable. You can still type your request.')
+        }
+      } else {
+        const responseText = 'I heard your San Diego trip brief. I’m checking your wardrobe, budget, and real product options now.'
+        setVoiceTurns(current => [...current, { id: `user-${Date.now()}`, role: 'user', text: prompt, createdAt: new Date().toISOString() }, { id: `assistant-${Date.now()}`, role: 'assistant', text: responseText, createdAt: new Date().toISOString() }])
+        speakFallback(responseText)
+      }
     }
     if (apiConfigured) {
       try { setSession(await createStyleSession(prompt)) } catch { setApiError('Live API unavailable — showing the demo plan.') }
