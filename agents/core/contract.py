@@ -187,6 +187,21 @@ def normalize_product(p: Any) -> dict | None:
     }
 
 
+def normalize_wardrobe_item(w: Any) -> dict | None:
+    """Make a stored WardrobeItem usable by the planner (Person 2's DB may differ in case / missing
+    category). Keeps every original field; fixes category, colors and tags. None if unusable."""
+    if not isinstance(w, dict) or not w.get("id") or not w.get("name"):
+        return None
+    from agents.core.taxonomy import kind_category  # local import avoids a cycle
+    out = dict(w)
+    out["name"] = str(w["name"])
+    out["category"] = (normalize_category(w.get("category")) or normalize_category(w.get("subcategory"))
+                       or kind_category(str(w.get("subcategory") or "")) or kind_category(out["name"]))
+    out["colors"] = _str_list(w.get("colors"))
+    out["tags"] = _str_list(w.get("tags"))
+    return out
+
+
 def wardrobe_item_active(item: dict, now: _dt.datetime | None = None) -> bool:
     """Temporary memory expires at expires_at (contract §9). Remembered never expires."""
     now = now or _dt.datetime.now(_dt.timezone.utc)

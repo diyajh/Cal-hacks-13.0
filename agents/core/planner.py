@@ -189,6 +189,10 @@ class TripPlanner:
         self._assign_required()
         self.ev("planning", f"Planning {len(self.outfits)} outfits: " +
                 ", ".join(f"Day {o['day']} {o['occasion']}" for o in self.outfits), status="working")
+        if self.wardrobe:
+            self.ev("planning", f"Considering {len(self.wardrobe)} piece(s) you own as candidates: "
+                    + ", ".join(f"{w['name']} ({w['category']})" for w in self.wardrobe[:8])
+                    + ("…" if len(self.wardrobe) > 8 else "") + " — used only where they fit.")
 
         needs: dict[tuple, dict] = {}
         for o in self.outfits:
@@ -213,7 +217,15 @@ class TripPlanner:
         return await self.check_and_replan([o["id"] for o in self.outfits])
 
     # ------------------------------------------------------------------ building
-    def _candidates(self, o, slot, max_price=None, marginal=False):
+    def _fits(self, s, item_id: str | None = None, occasion: str | None = None) -> bool:
+        """Owned piece is a genuine fit for this outfit (not just free). Pieces the user explicitly
+        mentioned for this request ("I already own white sneakers") get a slightly lower occasion bar,
+        except at dressy occasions."""
+        referenced = item_id in (self.request.get("owned_item_references") or [])
+        occ_bar = 50 if referenced and occasion not in tx.DRESS_OCCASIONS else 60
+        return s["occasion"] >= occ_bar and s["score"] >= 60
+
+    def _candidates(self, o, slot, max_price=None, marginal=False, allow_poor_fit=True):
         kind = o["required"].get(slot)
         key = self.ctx_key(o)
         out = []
@@ -227,6 +239,8 @@ class TripPlanner:
             s = self.score(item["id"], key)
             if s is None or s["excluded"]:
                 continue
+            if is_w and not allow_poor_fit and not self._fits(s, item["id"], o["occasion"]):
+                continue
             used_elsewhere = self.usage(item["id"], exclude_outfit=o["id"])
             if not is_w:
                 if used_elsewhere >= REUSE_LIMIT.get(slot, DEFAULT_REUSE_LIMIT):
@@ -236,11 +250,16 @@ class TripPlanner:
                     continue
             eff = s["score"]
             if is_w:
+                # Owned pieces get an advantage (no purchase needed) only when they genuinely fit;
+                # otherwise they compete on their own score and are never forced in.
                 bonus = OWNED_REF_BONUS if item["id"] in (self.request.get("owned_item_references") or []) else WARDROBE_BONUS
                 # A valid, sufficiently confident owned piece is preferred to a new
                 # purchase.  Reuse is a hard product principle, not a decorative UI hint.
                 confidence = item.get("confidence")
-                eff += (100.0 + bonus) if confidence is not None and float(confidence) >= 0.65 else (bonus if s["occasion"] >= 60 else bonus * 0.3)
+                if self._fits(s, item["id"], o["occasion"]):
+                    eff += (100.0 + bonus) if confidence is not None and float(confidence) >= 0.65 else bonus
+                else:
+                    eff += bonus * 0.3
             elif used_elsewhere:
                 eff += REUSE_BONUS
                 # avoid near-duplicate outfits: penalize pairing pieces that are already paired elsewhere
@@ -271,7 +290,7 @@ class TripPlanner:
             cur = o["picks"].get(slot)
             if cur and cur.get("locked"):
                 continue
-            cands = self._candidates(o, slot)
+            cands = self._candidates(o, slot, allow_poor_fit=False) or self._candidates(o, slot)
             o["picks"][slot] = None
             if cands:
                 self._pick(o, slot, cands[0])
@@ -378,7 +397,8 @@ class TripPlanner:
             target = round(p["item"]["price"] - overage, 2)
             if target < 5:
                 continue
-            if await self.replace_slot(o, slot, target, why=f"to bring {_label(o['id'])} under budget"):
+            if await self.replace_slot(o, slot, target, why=f"to bring {_label(o['id'])} under budget",
+                                       allow_poor_fit=False):
                 return True
         # no single swap fixes it: cheapen pieces (priciest first) and let the next round re-check
         for slot, p in sorted(replaceable, key=lambda sp: -sp[1]["item"]["price"]):
@@ -386,7 +406,13 @@ class TripPlanner:
                 continue
             o.setdefault("tried_partial", []).append(p["item"]["id"])
             if await self.replace_slot(o, slot, round(p["item"]["price"] - 0.01, 2),
-                                       why="for a partial saving", prefer_cheapest=True):
+                                       why="for a partial saving", prefer_cheapest=True, allow_poor_fit=False):
+                return True
+        # last resort: an owned piece that's a weaker style fit beats breaking the hard budget
+        for slot, p in replaceable:
+            target = round(p["item"]["price"] - overage, 2)
+            if target >= 0 and await self.replace_slot(o, slot, max(target, 0.0),
+                                                       why="(last resort: weaker-fit owned piece)"):
                 return True
         return False
 
@@ -404,7 +430,7 @@ class TripPlanner:
         return False
 
     async def replace_slot(self, o, slot, max_price, why="", prefer_cheapest=False, marginal=False,
-                           style_modifiers: list[str] | None = None) -> bool:
+                           style_modifiers: list[str] | None = None, allow_poor_fit: bool = True) -> bool:
         cur = o["picks"].get(slot)
         kind = o["required"].get(slot)
         what = kind or PLURAL[slot]
@@ -418,7 +444,7 @@ class TripPlanner:
 
         mods = style_modifiers if style_modifiers is not None else o.get("style_modifiers")
         await self._style(list(self.pool.values()) + self.wardrobe, [self.ctx_key(o)], o["id"])
-        cands = self._candidates(o, slot, max_price=max_price, marginal=marginal)
+        cands = self._candidates(o, slot, max_price=max_price, marginal=marginal, allow_poor_fit=False)
         if cands and not mods and config.REPLAN_SEARCH != "always":
             # Cost/latency saver: products already retrieved this session can satisfy it, so skip a
             # new live (paid) search. Style-change requests always search for fresh options.
@@ -431,7 +457,9 @@ class TripPlanner:
             await self._search(self._base_search(kind or CAT_QUERY[slot], slot, max_price=max_price, extra_style=mods),
                                "replacement search", o["id"])
             await self._style(list(self.pool.values()) + self.wardrobe, [self.ctx_key(o)], o["id"])
-            cands = self._candidates(o, slot, max_price=max_price, marginal=marginal)
+            cands = self._candidates(o, slot, max_price=max_price, marginal=marginal, allow_poor_fit=False)
+            if not cands and allow_poor_fit:
+                cands = self._candidates(o, slot, max_price=max_price, marginal=marginal)
         if prefer_cheapest:
             cands.sort(key=lambda x: (x[2].get("price") or 0) if not x[3] else -1)
         if not cands:
