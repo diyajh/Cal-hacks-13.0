@@ -65,7 +65,7 @@ def interpret_modification(message: str, target_outfit_id: str | None, outfits: 
     msg = message.lower().strip()
     act = {"target_outfit_ids": [], "replace_all": False, "replace_categories": [], "keep_categories": [],
            "style_modifiers": [], "cheaper": False, "budget_changes": {}, "add_avoid": [], "bought": [],
-           "remember": bool(REMEMBER_RE.search(msg)), "understood": False}
+           "replacement_budget": None, "remember": bool(REMEMBER_RE.search(msg)), "understood": False}
 
     targets = _targets(msg, outfits)
     if target_outfit_id and target_outfit_id not in targets:
@@ -76,6 +76,11 @@ def interpret_modification(message: str, target_outfit_id: str | None, outfits: 
     m = re.search(r"(?:each|per|every)\s+outfit[^$\d]{0,30}\$?\s?(\d+(?:\.\d+)?)|\$\s?(\d+(?:\.\d+)?)\s*(?:per|each|an?)\s+outfit", msg)
     if m:
         act["budget_changes"]["per_outfit_budget"] = float(m.group(1) or m.group(2))
+    # A targeted replacement can carry its own cap without changing the whole trip.
+    # Example: “replace the top in outfit 2 with something under $20”.
+    m = re.search(r"\b(?:under|below|less than|up to|at most)\s*\$?\s*(\d+(?:\.\d+)?)\b", msg)
+    if m and "per_outfit_budget" not in act["budget_changes"]:
+        act["replacement_budget"] = float(m.group(1))
     m = re.search(r"total(?:\s+budget)?[^$\d]{0,25}\$?\s?(\d+(?:\.\d+)?)|budget\s+(?:is|to|of)\s+(?:now\s+)?\$?\s?(\d+(?:\.\d+)?)(?![^.]*outfit)", msg)
     if m and "per_outfit_budget" not in act["budget_changes"] or (m and "total" in msg):
         act["budget_changes"]["total_budget"] = float(m.group(1) or m.group(2))
@@ -124,5 +129,6 @@ def interpret_modification(message: str, target_outfit_id: str | None, outfits: 
         act["replace_all"] = True
 
     act["understood"] = bool(act["replace_all"] or act["replace_categories"] or act["budget_changes"]
-                             or act["add_avoid"] or act["bought"] or act["style_modifiers"] or act["cheaper"])
+                             or act["replacement_budget"] is not None or act["add_avoid"] or act["bought"]
+                             or act["style_modifiers"] or act["cheaper"])
     return act

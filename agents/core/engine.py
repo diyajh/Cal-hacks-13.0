@@ -106,14 +106,17 @@ def _finalize(planner: TripPlanner, request: dict, events: list[dict], remaining
     unique: dict[str, float] = {}
     owned: dict[str, dict] = {}
     reused: dict[str, dict] = {}
+    candidate_reused: set[str] = set()
     for o in outfits:
         for it in o["items"]:
             if it["source_type"] == "product":
                 unique[it["product"]["id"]] = it["product"]["price"]
             else:
                 owned[it["id"]] = it
-            if it["reused"]:
+            if it["source_type"] == "wardrobe":
                 reused[it["id"]] = it
+            elif len(it.get("used_in_outfits") or []) > 1:
+                candidate_reused.add(it["product"]["id"])
     total = round(sum(unique.values()), 2)
     ok = not remaining
     status = "completed" if ok else "needs_user_input"
@@ -122,6 +125,12 @@ def _finalize(planner: TripPlanner, request: dict, events: list[dict], remaining
         "outfits": outfits, "total_new_purchase_cost": total, "total_budget": request.get("total_budget"),
         "owned_items_used": list(owned.values()), "reused_items": list(reused.values()),
         "constraint_violations": remaining, "all_constraints_satisfied": ok,
+        "wardrobe_reused_count": len(reused),
+        "unique_purchase_count": len(unique),
+        "purchases_avoided": len(reused),
+        "outfits_unlocked": sum(1 for o in outfits if any(i["source_type"] == "product" for i in o["items"])),
+        "wardrobe_value_avoided": round(sum((i.get("wardrobe_item") or {}).get("estimated_value") or 0 for i in reused.values()), 2),
+        "candidate_reused_count": len(candidate_reused),
     })
     if ok:
         parts = [intro or f"I created {len(outfits)} outfit{'s' if len(outfits) != 1 else ''}"
@@ -156,6 +165,9 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
     parsed = parse_request(raw_request, session_id, user_id, wardrobe or [])
     request = parsed["request"]
     wardrobe_all = list(wardrobe or []) + parsed["new_wardrobe_items"]
+    log.info("plan inventory count=%d ids=%s categories=%s sources=%s", len(wardrobe_all),
+             [w.get("id") for w in wardrobe_all], [w.get("category") for w in wardrobe_all],
+             [w.get("source", "wardrobe") for w in wardrobe_all])
 
     if parsed["clarification"]:
         emit(make_event(session_id, ORCH, "request_parsed", parsed["clarification"], "failed"))
@@ -195,6 +207,8 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
 
     conflict = _conflict(remaining, request, planner) if remaining else None
     rec = _finalize(planner, request, events, remaining, session_id, conflict)
+    log.info("plan response session=%s wardrobe_reused=%s candidate_reused=%s purchases=%s", session_id,
+             rec.get("wardrobe_reused_count"), rec.get("candidate_reused_count"), rec.get("unique_purchase_count"))
     if not planner.pool and any("live search failed" in e["message"] for e in events):
         # nothing could be retrieved at all: this is a service outage, not a constraint conflict
         rec.update(status="failed", message="I couldn't reach the product search service, so I can't build outfits "
@@ -310,6 +324,8 @@ async def modify_shopping(modification: dict, profile: dict | None = None, wardr
                        if p and s not in slots and p["source"] == "product")
             cur = o["picks"].get(slot)
             cap = (limit - kept) if limit is not None else (cur["item"].get("price", 50) * 2 if cur else 100)
+            if act.get("replacement_budget") is not None:
+                cap = min(cap, act["replacement_budget"])
             if act["cheaper"] and cur and cur["source"] == "product":
                 cap = min(cap, round(cur["item"]["price"] * 0.7, 2))
             reason = "per your request" + (f" ({', '.join(act['style_modifiers'])})" if act["style_modifiers"] else "")

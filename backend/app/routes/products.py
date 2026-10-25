@@ -1,17 +1,15 @@
-import json
-from pathlib import Path
-from fastapi import APIRouter
+import os
+from fastapi import APIRouter, HTTPException
 
 from app.models.product import Product, ProductSearchRequest
 from app.services.apify import search_apify
 
 router = APIRouter(prefix="/products")
 
-DATA = Path(__file__).parents[2] / "fallback_data/products.json"
-
-
 @router.post("/search", response_model=list[Product])
 async def search_products(req: ProductSearchRequest):
+    if not os.getenv("APIFY_API_TOKEN", "").strip():
+        raise HTTPException(status_code=503, detail="LIVE SEARCH NOT CONFIGURED — set APIFY_API_TOKEN in backend/.env")
     try:
         products = await search_apify(
             req.query,
@@ -24,16 +22,6 @@ async def search_products(req: ProductSearchRequest):
             return products
 
     except Exception as e:
-        print("Apify failed:", e)
+        raise HTTPException(status_code=502, detail=f"LIVE SEARCH FAILED — {e}") from e
 
-    # fallback
-    products = json.loads(DATA.read_text())
-
-    return [
-        p for p in products
-        if req.query.lower() in (
-            p["name"] + " " +
-            (p.get("description") or "") + " " +
-            " ".join(p.get("tags", []))
-        ).lower()
-    ][:req.limit]
+    raise HTTPException(status_code=404, detail="LIVE SEARCH RETURNED NO PRODUCTS")

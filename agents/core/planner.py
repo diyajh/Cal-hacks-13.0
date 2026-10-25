@@ -10,7 +10,7 @@ import asyncio
 
 from agents import config
 from agents.core import taxonomy as tx
-from agents.core.contract import make_event, wardrobe_item_active
+from agents.core.contract import make_event, wardrobe_item_active, normalize_category
 from agents.core.explain import why_it_works
 from agents.core.scoring import score_outfit
 from agents.products.client import make_search_request
@@ -33,13 +33,30 @@ def _label(outfit_id: str) -> str:
     return outfit_id.replace("_", " ").capitalize()
 
 
+def normalize_wardrobe_item(item: dict, index: int = 0) -> dict:
+    """Convert vision/user fields into the planner's canonical inventory shape."""
+    item = dict(item or {})
+    category = normalize_category(item.get("category")) or item.get("category") or "accessory"
+    colors = item.get("colors") or ([item.get("color")] if item.get("color") else [])
+    name = item.get("name") or " ".join(x for x in (item.get("color"), item.get("category")) if x) or f"Wardrobe item {index + 1}"
+    item.update({
+        "id": str(item.get("id") or f"wardrobe_{index + 1}_{name.lower().replace(' ', '_')}"),
+        "name": name, "category": category, "colors": colors,
+        "tags": item.get("tags") or ([item.get("style")] if item.get("style") else []),
+        "source": "wardrobe", "confidence": item.get("confidence"),
+        "image_url": item.get("image_url") or item.get("image") or "",
+    })
+    return item
+
+
 class TripPlanner:
     def __init__(self, session_id: str, request: dict, profile: dict | None, wardrobe: list[dict],
                  bus, events: list[dict], state: dict | None = None, on_event=None):
         self.sid = session_id
         self.request = request
         self.profile = profile or {}
-        self.wardrobe = [w for w in (wardrobe or []) if wardrobe_item_active(w)]
+        self.wardrobe = [normalize_wardrobe_item(w, i) for i, w in enumerate(wardrobe or [])
+                         if wardrobe_item_active(w)]
         self.bus = bus
         self.events = events
         self.on_event = on_event
@@ -220,7 +237,10 @@ class TripPlanner:
             eff = s["score"]
             if is_w:
                 bonus = OWNED_REF_BONUS if item["id"] in (self.request.get("owned_item_references") or []) else WARDROBE_BONUS
-                eff += bonus if s["occasion"] >= 60 else bonus * 0.3  # owned sneakers shouldn't win at dinner
+                # A valid, sufficiently confident owned piece is preferred to a new
+                # purchase.  Reuse is a hard product principle, not a decorative UI hint.
+                confidence = item.get("confidence")
+                eff += (100.0 + bonus) if confidence is not None and float(confidence) >= 0.65 else (bonus if s["occasion"] >= 60 else bonus * 0.3)
             elif used_elsewhere:
                 eff += REUSE_BONUS
                 # avoid near-duplicate outfits: penalize pairing pieces that are already paired elsewhere
@@ -455,6 +475,7 @@ class TripPlanner:
                     "purchase_required": is_prod,
                     "reused": len(used_in[k]) > 1,
                     "used_in_outfits": used_in[k],
+                    "source": "candidate" if is_prod else "wardrobe",
                 })
                 raw_items.append(p["item"])
                 s = self.score(p["item"]["id"], key)

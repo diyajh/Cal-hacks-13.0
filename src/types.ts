@@ -8,6 +8,7 @@ export interface ParsedRequest {
 export interface Product {
   id: string; name: string; retailer: string; price: number; category: ProductCategory
   image: string; link: string; owned?: boolean; match: number; note?: string
+  source?: 'wardrobe' | 'candidate'; decision?: ProductDecision
 }
 export interface Outfit {
   id: string; day: number; title: string; setting: string; score: number
@@ -20,4 +21,19 @@ export interface StyleSession {
   session: string; parsedRequest: ParsedRequest; styleDNA: StyleDNA[]; outfits: Outfit[]
   totalCost: number; newPurchaseCost: number; ownedItems: Product[]; reusedItems: Product[]
   agentEvents: AgentEvent[]; constraintStatus: 'satisfied' | 'conflict'; conflict?: SessionConflict
+  wardrobeReusedCount?: number; candidateReusedCount?: number; uniquePurchaseCount?: number; purchasesAvoided?: number; wardrobeValueAvoided?: number
+}
+export interface WardrobeItem {
+  category: string; subcategory: string; color: string; pattern: string; material: string
+  subtype?: string; style: string; formality: string; confidence: number
+  id?: string; name?: string; image?: string; image_url?: string; source?: 'wardrobe'
+  memory_type?: 'temporary' | 'remembered'; expires_at?: string | null
+}
+export interface ProductDecision {
+  verdict: 'BUY' | 'SKIP' | 'INSUFFICIENT_WARDROBE_DATA' | string
+  confidence: number; duplication_score: number; outfits_unlocked: number
+  budget_impact: number | null; reason: string; matched_items: WardrobeItem[]; missing_information: string[]
+}
+export interface LiveStatus {
+  vision: boolean; apify: boolean; cartesia: boolean; fetch: boolean
 }

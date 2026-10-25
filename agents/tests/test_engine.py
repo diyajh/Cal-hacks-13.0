@@ -23,10 +23,11 @@ CANONICAL = ("I'm going to San Diego for five days. I need five outfits. Each ou
 
 REC_KEYS = {"session_id", "status", "parsed_request", "outfits", "total_new_purchase_cost", "total_budget",
             "owned_items_used", "reused_items", "agent_events", "constraint_violations",
-            "all_constraints_satisfied", "message"}
+            "all_constraints_satisfied", "message", "wardrobe_reused_count", "unique_purchase_count",
+            "purchases_avoided", "outfits_unlocked", "wardrobe_value_avoided", "candidate_reused_count"}
 OUTFIT_KEYS = {"id", "title", "day", "occasion", "match_score", "score_breakdown", "items", "total_value",
                "new_purchase_cost", "why_it_works", "constraints_satisfied"}
-ITEM_KEYS = {"id", "source_type", "product", "wardrobe_item", "purchase_required", "reused", "used_in_outfits"}
+ITEM_KEYS = {"id", "source_type", "source", "product", "wardrobe_item", "purchase_required", "reused", "used_in_outfits"}
 EVENT_KEYS = {"id", "session_id", "agent", "type", "status", "message", "outfit_id", "timestamp"}
 
 
@@ -35,6 +36,19 @@ def run(coro):
 
 
 class TestParser(unittest.TestCase):
+    def test_currency_never_becomes_look_count(self):
+        cases = [
+            ("five days under $50 per outfit", 5, 50),
+            ("5 days under $50 each", 5, 50),
+            ("create 3 looks under $75", 3, 75),
+            ("create 5 outfits under fifty dollars", 5, 50),
+            ("I need 10 looks for a 5-day trip under $40 each", 10, 40),
+        ]
+        for text, looks, budget in cases:
+            request = parse_request(text, "s", "u", use_llm=False)["request"]
+            self.assertEqual(request["number_of_outfits"], looks, text)
+            self.assertEqual(request["per_outfit_budget"], budget, text)
+
     def test_canonical(self):
         r = parse_request(CANONICAL, "s", "u", use_llm=False)["request"]
         self.assertEqual(list(r.keys()), SHOPPING_REQUEST_KEYS)
@@ -139,6 +153,22 @@ class TestPlan(unittest.TestCase):
         self.assertIn("replacement_found", types)
         self.assertNotIn("neon", " ".join(str(o["items"]) for o in self.rec["outfits"]).lower())
 
+    def test_vision_wardrobe_is_reused_and_excluded_from_purchases(self):
+        result = run(plan_shopping(
+            "One casual outfit for San Diego under $120", "wardrobe_user", "vision-wardrobe",
+            wardrobe=[
+                {"id": "w-pants", "name": "Beige pants", "category": "pants", "color": "beige", "style": "casual", "confidence": 0.94},
+                {"id": "w-jacket", "name": "Beige jacket", "category": "jacket", "color": "beige", "style": "casual", "confidence": 0.92},
+                {"id": "w-shoes", "name": "White shoes", "category": "shoes", "color": "white", "style": "casual", "confidence": 0.97},
+            ]))
+        rec = result["final_recommendation"]
+        items = [item for outfit in rec["outfits"] for item in outfit["items"]]
+        names = {(item["source"], (item["wardrobe_item"] or item["product"])["name"]) for item in items}
+        self.assertIn(("wardrobe", "Beige pants"), names)
+        self.assertIn(("wardrobe", "White shoes"), names)
+        self.assertEqual(rec["wardrobe_reused_count"], 2)
+        self.assertEqual(rec["unique_purchase_count"], 1)
+
     def test_modify_only_target(self):
         before = {o["id"]: [i["id"] for i in o["items"]] for o in self.rec["outfits"]}
         top_before = [i for i in self.rec["outfits"][2]["items"] if (i["product"] or i["wardrobe_item"])["category"] == "top"]
@@ -152,6 +182,15 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(top_before[0]["id"], top_after[0]["id"])
         self.assertNotEqual(before["outfit_3"], after["outfit_3"])
         self.assertTrue(r["all_constraints_satisfied"])
+
+    def test_targeted_replacement_budget_is_enforced(self):
+        r = run(modify_shopping({"session_id": "session_unittest", "user_id": "user_123",
+                                 "message": "Replace the top in outfit 2 with something under $20.",
+                                 "target_outfit_id": None}))
+        rec = r["final_recommendation"]
+        outfit = next(o for o in rec["outfits"] if o["id"] == "outfit_2")
+        top = next(i for i in outfit["items"] if (i["product"] or i["wardrobe_item"])["category"] == "top")
+        self.assertLessEqual((top["product"] or top["wardrobe_item"]).get("price", 0), 20)
 
 
 class TestConflict(unittest.TestCase):

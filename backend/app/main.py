@@ -1,6 +1,8 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from uuid import uuid4
+import httpx
 
 from .config import load_settings
 from .agents_client import AgentsClient, AgentsUnavailableError
@@ -10,6 +12,7 @@ from .voice import CartesiaVoiceGateway, ProviderNotConfiguredError
 from .routes.products import router as products_router
 from .routes.users import router as users_router
 from .routes.shopping import router as shopping_router
+from .routes.wardrobe import router as wardrobe_router
 
 
 settings = load_settings()
@@ -20,19 +23,32 @@ app.add_middleware(
     allow_origins=list(settings.allowed_origins),
     allow_origin_regex=r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|chrome-extension://[a-p]{32})$",
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 app.include_router(products_router)
 app.include_router(users_router)
 app.include_router(shopping_router)
+app.include_router(wardrobe_router)
 
 
 @app.get("/health")
 async def health() -> dict[str, object]:
+    fetch_connected = False
+    try:
+        async with httpx.AsyncClient(timeout=2) as client:
+            fetch_connected = (await client.get(f"{settings.agents_base_url}/health")).is_success
+    except httpx.HTTPError:
+        fetch_connected = False
     return {
         "ok": True,
         "cartesia_configured": bool(settings.cartesia_api_key),
+        "apify_configured": bool(os.getenv("APIFY_API_TOKEN", "").strip()),
+        "vision_configured": bool(
+            os.getenv("OPENAI_API_KEY", "").strip()
+            or os.getenv("ANTHROPIC_API_KEY", "").strip()
+        ),
+        "fetch_connected": fetch_connected,
         "stt_model": settings.cartesia_stt_model,
         "tts_model": settings.cartesia_tts_model,
         "agents_base_url": settings.agents_base_url,
@@ -135,6 +151,8 @@ async def transcribe_voice(session_id: str, audio: UploadFile = File(...)) -> Tr
         )
     except ProviderNotConfiguredError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
+    except Exception as error:
+        raise HTTPException(status_code=502, detail=f"Cartesia STT request failed: {error}") from error
     return TranscriptionResponse(
         session_id=session_id,
         transcript=result.text,

@@ -105,6 +105,10 @@ def _validate(raw: list, req: dict) -> tuple[list[dict], dict]:
             missing = [k for k in ("id", "name", "price", "category") if not isinstance(item, dict) or item.get(k) in (None, "")]
             why = f"missing {', '.join(missing)}" if missing else f"unrecognised category or price: {item.get('category')!r}/{item.get('price')!r}"
             reject("invalid", item, why)
+        elif p.get("source") not in {"apify", "live"} and config.PRODUCT_SEARCH_URL:
+            reject("invalid", item, "live result is not an Apify product")
+        elif not p["image_url"] or not p["product_url"] or not p["retailer"]:
+            reject("invalid", item, "live product is missing image, URL, or retailer")
         elif not p["available"]:
             reject("unavailable", item, "available=false")
         elif req.get("max_price") is not None and p["price"] > req["max_price"]:
@@ -185,7 +189,7 @@ def search_products(req: dict) -> tuple[list[dict], str, dict]:
         products, stats = _validate(cached, req)
         return products, "cache", stats
     if time.time() < _DOWN["until"]:
-        return _fallback(req, f"product service unavailable ({_DOWN['reason']})")
+        return [], "none", {"error": f"product service unavailable ({_DOWN['reason']})"}
     try:
         raw = _fetch_live(req)
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
@@ -194,7 +198,8 @@ def search_products(req: dict) -> tuple[list[dict], str, dict]:
             detail = f"HTTP {exc.code}: {exc.read().decode(errors='replace')[:200]}"
         log.warning("product service failed for %r: %s", req.get("query"), detail)
         _DOWN.update(until=time.time() + BREAKER_SECONDS, reason=str(detail)[:80])
-        return _fallback(req, str(detail))
+        # A live-configured demo must never downgrade to stale or mock products.
+        return [], "none", {"error": str(detail)}
     _cache_put(req, raw)
     products, stats = _validate(raw, req)
     return products, "product_service", stats

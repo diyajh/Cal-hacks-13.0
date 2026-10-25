@@ -19,6 +19,8 @@ _NUM = r"\b(\d+|" + "|".join(sorted(tx.NUMBER_WORDS, key=len, reverse=True)) + r
 _N = r"(\d+(?:,\d{3})*(?:\.\d+)?)"
 # money with an explicit marker: $50, 50$, 50 dollars/usd/bucks
 _MONEY = r"\$\s?" + _N + r"|" + _N + r"\s?(?:\$|dollars?|usd|bucks)"
+_MONEY_WORD = _NUM + r"\s+dollars?"
+_MONEY_ANY = r"(?:" + _MONEY + r"|" + _MONEY_WORD + r")"
 # amount in a budget context: marker optional ("total budget is 500")
 _AMT = r"\$?\s?" + _N + r"\s?(?:\$|dollars?|usd|bucks)?"
 _LOC_STOP = {"the", "a", "an", "my", "our", "beach", "work", "school", "dinner", "brunch", "party", "wedding"}
@@ -44,7 +46,13 @@ def _num(s: str) -> int | None:
 
 def _money(m: re.Match) -> float | None:
     raw = next((g for g in m.groups() if g), None)
-    return float(raw.replace(",", "")) if raw else None
+    if not raw:
+        return None
+    try:
+        return float(raw.replace(",", ""))
+    except ValueError:
+        value = _num(raw)
+        return float(value) if value is not None else None
 
 
 def _clauses(text: str) -> list[str]:
@@ -101,9 +109,11 @@ def rule_parse(text: str) -> dict:
     elif "weekend" in low:
         data["duration_days"] = 2
 
-    # outfits
-    plural = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfits|looks|fits|sets|outfit ideas)\b", low)
-    single = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfit|look)\b", low)
+    # Currency is removed before count parsing. Without this, "$50 per outfit"
+    # matches the count regex as "50 per outfit" and silently becomes 50 looks.
+    count_text = re.sub(_MONEY_ANY, " ", low, flags=re.I)
+    plural = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfits|looks|fits|sets|outfit ideas)\b", count_text)
+    single = re.search(_NUM + r"\s+(?:\w+\s+)?(?:outfit|look)\b", count_text)
     m = plural or single
     if m and _num(m.group(1)):
         data["number_of_outfits"] = _num(m.group(1))
@@ -125,17 +135,24 @@ def rule_parse(text: str) -> dict:
 
     # per-outfit budget
     for pat in [
-        r"(?:each|per|every|an?)\s+outfit[^.\d$]{0,40}?(?:" + _AMT + r")",
+        r"(?:each|per|every|an?)\s+outfit[^.\d$]{0,40}?(?:" + _AMT + r"|" + _NUM + r"\s+dollars?)",
         r"(?:" + _MONEY + r")\s*(?:per|each|an?|for each|/)\s*outfit",
         r"outfits?\s+(?:that are\s+|each\s+)?(?:under|below|less than|max(?:imum)?|up to|at most|no more than|"
-        r"nothing over|not over)\s*(?:" + _AMT + r")",
+        r"nothing over|not over)\s*(?:" + _AMT + r"|" + _NUM + r"\s+dollars?)",
         r"(?:" + _MONEY + r")\s*each",
-        r"(?:nothing over|not over|under|max)\s*(?:" + _MONEY + r")\s*(?:each|apiece|a piece|per look|a look)",
+        r"(?:nothing over|not over|under|max)\s*(?:" + _MONEY_ANY + r")\s*(?:each|apiece|a piece|per look|a look|per outfit)",
     ]:
         m = re.search(pat, low)
         if m and _money(m) != data.get("total_budget"):
             data["per_outfit_budget"] = _money(m)
             break
+    if "per_outfit_budget" not in data and re.search(r"\b(?:outfits?|looks?)\b", low):
+        # Covers the compact forms “3 looks under $75” and “5 outfits under
+        # fifty dollars”, which do not include the words “each” or “per”.
+        m = re.search(r"\b(?:under|below|less than|max(?:imum)?|up to|at most)\s*(?:\$\s*" + _N +
+                    r"|" + _NUM + r"\s+dollars?)", low)
+        if m:
+            data["per_outfit_budget"] = _money(m)
 
     styles: list[str] = []
     for s in tx.STYLES:
@@ -283,6 +300,19 @@ def parse_request(raw_request: str, session_id: str, user_id: str,
                 merged[key] = llm[key]
         if llm.get("strong_avoid"):
             merged["hard_constraints"] = ["avoid"]
+
+    # A budget/count collision is a parser error, not a valid request. Prefer
+    # an explicit rule-based count, then the duration default; otherwise reject
+    # rather than planning an obviously suspicious number of looks.
+    budget_count = merged.get("per_outfit_budget")
+    if budget_count is not None and merged.get("number_of_outfits") == budget_count:
+        fallback_count = rules.get("number_of_outfits")
+        if fallback_count is None:
+            fallback_count = rules.get("duration_days")
+        if fallback_count is not None and fallback_count != budget_count:
+            merged["number_of_outfits"] = fallback_count
+        else:
+            merged["number_of_outfits"] = None
 
     owned = [{"name": p} for p in rules.get("_owned_phrases", [])]
     if llm and isinstance(llm.get("owned_items"), list):

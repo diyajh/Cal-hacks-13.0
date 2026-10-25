@@ -1,13 +1,17 @@
-from datetime import datetime, timedelta, timezone
-from uuid import uuid4
-
 from fastapi import APIRouter, HTTPException
 from app.models.user import UserProfile, WardrobeItem
+from app.services.wardrobe_store import WardrobeStore, create_store
 
 router = APIRouter(prefix="/users")
 
 profiles = {}
-wardrobes = {}
+wardrobe_store: WardrobeStore = create_store()
+
+
+def configure_wardrobe_store(database_url: str) -> None:
+    """Replace the store for isolated tests or an explicit local database URL."""
+    global wardrobe_store
+    wardrobe_store = create_store(database_url)
 
 
 @router.put("/{user_id}/profile")
@@ -23,40 +27,29 @@ def get_profile(user_id: str):
 
 @router.post("/{user_id}/wardrobe")
 def add_item(user_id: str, item: WardrobeItem):
-    item.id = str(uuid4())
+    return wardrobe_store.create(user_id, item)
 
-    if item.memory_type == "temporary":
-        item.expires_at = datetime.now(timezone.utc) + timedelta(days=30)
-    else:
-        item.expires_at = None
 
-    wardrobes.setdefault(user_id, []).append(item)
-
-    return item
+@router.put("/{user_id}/wardrobe/{item_id}")
+def update_item(user_id: str, item_id: str, item: WardrobeItem):
+    updated = wardrobe_store.update(user_id, item_id, item)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Wardrobe item not found")
+    return updated
 
 
 @router.get("/{user_id}/wardrobe")
 def get_wardrobe(user_id: str):
-    now = datetime.now(timezone.utc)
-
-    items = [
-        item
-        for item in wardrobes.get(user_id, [])
-        if item.expires_at is None or item.expires_at > now
-    ]
-
-    wardrobes[user_id] = items
-
-    return items
+    return wardrobe_store.list(user_id)
 
 
 @router.delete("/{user_id}/wardrobe/{item_id}")
 def delete_item(user_id: str, item_id: str):
-    items = wardrobes.get(user_id, [])
+    if not wardrobe_store.delete(user_id, item_id):
+        raise HTTPException(status_code=404, detail="Wardrobe item not found")
+    return {"deleted": True}
 
-    for item in items:
-        if item.id == item_id:
-            items.remove(item)
-            return {"deleted": True}
 
-    raise HTTPException(status_code=404, detail="Wardrobe item not found")
+@router.delete("/{user_id}/wardrobe")
+def clear_wardrobe(user_id: str):
+    return {"deleted": wardrobe_store.clear(user_id)}
