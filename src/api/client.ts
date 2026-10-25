@@ -6,7 +6,7 @@ import { VoiceAgentResponse } from '../voiceAgent'
  * Backend adapter for the React layer.
  *
  * Keep API details here so components only deal with StyleSession objects.
- * With no VITE_API_BASE_URL, the app stays fully demoable against mock data.
+ * The extension uses the local live gateway; service readiness comes from /health.
  */
 const extensionRuntime = Boolean((globalThis as any).chrome?.runtime?.id)
 const configuredBase = (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
@@ -16,7 +16,7 @@ const API_BASE_URL = configuredBase || (extensionRuntime ? 'http://127.0.0.1:801
 const VOICE_API_BASE_URL = (import.meta as any).env?.VITE_VOICE_API_BASE_URL?.replace(/\/$/, '') || (extensionRuntime ? 'http://127.0.0.1:8019' : 'http://127.0.0.1:8018')
 const USER_ID = (import.meta as any).env?.VITE_AURA_USER_ID || 'demo_user'
 
-export const apiConfigured = Boolean(API_BASE_URL)
+export let apiConfigured = false
 
 export async function getSavedWardrobe(): Promise<WardrobeItem[]> {
   const items = await request<any[]>(`/users/${encodeURIComponent(USER_ID)}/wardrobe`)
@@ -65,6 +65,7 @@ export async function getLiveStatus(): Promise<LiveStatus> {
   if (!response.ok) throw new Error(`Aura health ${response.status}`)
   const health = await response.json() as { vision_configured?: boolean; apify_configured?: boolean; cartesia_configured?: boolean; fetch_connected?: boolean }
   const fetchConnected = Boolean(health.fetch_connected)
+  apiConfigured = response.ok && fetchConnected
   return { vision: Boolean(health.vision_configured), apify: Boolean(health.apify_configured), cartesia: Boolean(health.cartesia_configured), fetch: fetchConnected }
 }
 

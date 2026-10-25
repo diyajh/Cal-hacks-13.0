@@ -5,7 +5,7 @@ from typing import Optional
 import logging
 
 from app.routes import users
-from app.models.user import UserProfile
+from app.models.user import UserProfile, WardrobeItem
 from app.config import load_settings
 from app.services.wardrobe_decision import compare_product
 
@@ -86,7 +86,24 @@ async def plan(req: PlanRequest):
                 json=payload
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            for raw_item in result.get("wardrobe_items_to_save") or []:
+                try:
+                    item = WardrobeItem.model_validate({**raw_item, "source": "wardrobe"})
+                    if item.id and item.name:
+                        existing = next((saved for saved in stored_wardrobe if saved.id == item.id), None)
+                        if existing:
+                            users.wardrobe_store.update(req.user_id, item.id, item)
+                        else:
+                            users.wardrobe_store.create(req.user_id, item)
+                except Exception as error:
+                    log.warning("planner wardrobe item not persisted: %s", type(error).__name__)
+            if isinstance(result.get("profile_updates"), dict):
+                current = users.wardrobe_store.get_profile(req.user_id)
+                updates = {key: value for key, value in result["profile_updates"].items() if hasattr(current, key)}
+                if updates:
+                    users.wardrobe_store.save_profile(req.user_id, current.model_copy(update=updates))
+            return result
 
     except httpx.HTTPError as e:
         raise HTTPException(

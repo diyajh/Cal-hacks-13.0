@@ -34,3 +34,9 @@ test('clearing the last wardrobe item cannot retain a duplicate decision', () =>
   assert.match(source, /setProductDecision\(null\)/)
   assert.match(extensionShell, /Add wardrobe items to check for duplicates\./)
 })
+
+test('clearing wardrobe invalidates the current plan UI', () => {
+  assert.match(source, /setSubmitted\(false\)\n\s+setModification\('\'\)/)
+  assert.match(source, /setCheckoutOpen\(false\)/)
+  assert.match(source, /setProductDecision\(null\)/)
+})

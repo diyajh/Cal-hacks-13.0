@@ -97,7 +97,7 @@ function App() {
   const [liveStatus, setLiveStatus] = useState({ vision: false, apify: false, cartesia: false, fetch: false })
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [developerDetails, setDeveloperDetails] = useState(false)
-  const cartesiaConfigured = Boolean((import.meta as any).env?.VITE_VOICE_API_BASE_URL || 'http://127.0.0.1:8018')
+  const cartesiaConfigured = liveStatus.cartesia
   const visibleOutfits = useMemo(() => activeDay === 'all' ? session.outfits : session.outfits.filter(o => String(o.day) === activeDay), [activeDay, session.outfits])
   const wardrobeItem = session.ownedItems[0]
   const activeProduct = pageContext?.product
@@ -129,7 +129,7 @@ function App() {
   useEffect(() => {
     if (!apiConfigured) return
     getStyleProfile().then(profile => { setStyleProfile(profile); setProfileDraft(profile); setProfileSaved(Boolean(profile.shopping_fit && (profile.preferred_styles.length || profile.preferred_colors.length))) }).catch(() => undefined)
-  }, [])
+  }, [liveStatus.fetch])
   useEffect(() => {
     if (!apiConfigured) return
     loadDemoOrApiSession().then(setSession).catch(() => setApiError('Live API unavailable — showing the demo plan.'))
@@ -236,6 +236,9 @@ function App() {
       else {
         decisionRequestRef.current += 1
         setProductDecision(null)
+        setSubmitted(false)
+        setModification('')
+        setCheckoutOpen(false)
       }
       return next
     })
@@ -259,6 +262,9 @@ function App() {
       setMemoryScope(null)
       decisionRequestRef.current += 1
       setProductDecision(null)
+      setSubmitted(false)
+      setModification('')
+      setCheckoutOpen(false)
     } catch {
       setWardrobeError('Could not clear wardrobe memory. Try again.')
     }

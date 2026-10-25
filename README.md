@@ -2,7 +2,7 @@
 
 Aura is a Chrome side-panel shopping concierge. A user describes a trip or occasion by voice or text, and Aura combines their saved wardrobe, profile constraints, budget, live retailer research, and agent reasoning into explainable outfit recommendations. It can also compare the product on the current browser page against the wardrobe and explain a BUY, SKIP, or “needs more detail” decision.
 
-Aura is a planning and discovery experience. It does not collect payment-card details, provide checkout, or claim direct retailer checkout.
+Aura is a planning and discovery experience. It does not collect payment-card details, provide checkout, or claim direct retailer checkout. A live FastAPI, Fetch/uAgents, Apify, vision, and Cartesia setup is required for the complete flow; typed requests are not a fully offline mode.
 
 ## Architecture
 
