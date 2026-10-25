@@ -1,7 +1,7 @@
 import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { demoSession } from './mockData'
-import { Outfit, Product, ProductDecision, WardrobeItem } from './types'
-import { analyzeWardrobeImage, apiConfigured, clearSavedWardrobe, compareWardrobeProduct, createStyleSession, deleteSavedWardrobe, getLiveStatus, getSavedWardrobe, loadDemoOrApiSession, modifyStyleSession, saveWardrobeItem, sendVoiceTurn, transcribeVoiceAudio, updateWardrobeMemory } from './api/client'
+import { Outfit, Product, ProductDecision, StyleProfile, WardrobeItem } from './types'
+import { analyzeWardrobeImage, apiConfigured, clearSavedWardrobe, compareWardrobeProduct, createStyleSession, deleteSavedWardrobe, getLiveStatus, getSavedWardrobe, getStyleProfile, loadDemoOrApiSession, modifyStyleSession, saveStyleProfile, saveWardrobeItem, sendVoiceTurn, transcribeVoiceAudio, updateWardrobeMemory } from './api/client'
 import { BrowserSpeechRecognition, createSpeechRecognition } from './voice'
 import { VoiceAgentState, VoiceTurn } from './voiceAgent'
 import { addPageContext, getActivePageContext, PageContext, subscribeToPageContext } from './extensionBridge'
@@ -87,6 +87,10 @@ function App() {
   const [wardrobeLoadState, setWardrobeLoadState] = useState<'loading' | 'loaded' | 'empty' | 'error'>('loading')
   const [wardrobeError, setWardrobeError] = useState('')
   const [productDecision, setProductDecision] = useState<ProductDecision | null>(null)
+  const [styleProfile, setStyleProfile] = useState<StyleProfile>({ shopping_fit: null, preferred_styles: [], preferred_colors: [], avoided_colors: [], usual_size: '', default_budget_per_outfit: null, preference_tags: [] })
+  const [profileDraft, setProfileDraft] = useState(styleProfile)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
   const [liveStatus, setLiveStatus] = useState({ vision: false, apify: false, cartesia: false, fetch: false })
   const cartesiaConfigured = Boolean((import.meta as any).env?.VITE_VOICE_API_BASE_URL || 'http://127.0.0.1:8018')
   const visibleOutfits = useMemo(() => activeDay === 'all' ? session.outfits : session.outfits.filter(o => String(o.day) === activeDay), [activeDay, session.outfits])
@@ -114,6 +118,10 @@ function App() {
     description: activeProduct.description ?? '',
   } : null
   const activeProductComplete = Boolean(activeProductPayload?.name?.trim() && activeProductPayload.price != null && String(activeProductPayload.price).trim() !== '' && Number.isFinite(Number(activeProductPayload.price)) && Number(activeProductPayload.price) >= 0 && activeProductPayload.currency && activeProductPayload.image_url && activeProductPayload.product_url && activeProductPayload.category && ['complete', 'decision_ready', 'enriched'].includes(pageContext?.extraction_quality?.status || ''))
+  useEffect(() => {
+    if (!apiConfigured) return
+    getStyleProfile().then(profile => { setStyleProfile(profile); setProfileDraft(profile); setProfileSaved(Boolean(profile.shopping_fit && (profile.preferred_styles.length || profile.preferred_colors.length))) }).catch(() => undefined)
+  }, [])
   useEffect(() => {
     if (!apiConfigured) return
     loadDemoOrApiSession().then(setSession).catch(() => setApiError('Live API unavailable — showing the demo plan.'))
@@ -245,7 +253,7 @@ function App() {
       setVoiceState(apiConfigured ? 'thinking' : 'heard')
       if (apiConfigured) {
         try {
-          const response = await sendVoiceTurn(session.session, prompt, wardrobeItems)
+          const response = await sendVoiceTurn(session.session, prompt, wardrobeItems, styleProfile)
           if (response.styleSession) setSession(response.styleSession)
           const now = new Date().toISOString()
           setVoiceTurns(current => [...current, { id: `user-${Date.now()}`, role: 'user', text: prompt, createdAt: now }, { id: `assistant-${Date.now()}`, role: 'assistant', text: response.responseText, createdAt: now, audioUrl: response.audioDataUrl }])
@@ -273,7 +281,7 @@ function App() {
       setIsPlanning(true)
       setApiError('')
       try {
-        setSession(await createStyleSession(prompt, undefined, wardrobeItems))
+        setSession(await createStyleSession(prompt, undefined, wardrobeItems, styleProfile))
         setSubmitted(true)
       } catch {
         if (extensionRuntime) setSubmitted(false)
@@ -412,7 +420,7 @@ function App() {
       setModification('')
       setIsModifying(true)
       setApiError('')
-      modifyStyleSession(session.session, instruction, wardrobeItems).then(next => { setSession(next); setSubmitted(true) }).catch(() => { if (extensionRuntime) setSubmitted(false); setApiError(extensionRuntime ? 'LIVE MODIFICATION UNAVAILABLE — check the FastAPI and Fetch services.' : 'Live API unavailable — showing the demo plan.') }).finally(() => setIsModifying(false))
+      modifyStyleSession(session.session, instruction, wardrobeItems, styleProfile).then(next => { setSession(next); setSubmitted(true) }).catch(() => { if (extensionRuntime) setSubmitted(false); setApiError(extensionRuntime ? 'LIVE MODIFICATION UNAVAILABLE — check the FastAPI and Fetch services.' : 'Live API unavailable — showing the demo plan.') }).finally(() => setIsModifying(false))
       setSubmitted(true)
       return
     }
@@ -437,7 +445,17 @@ function App() {
     const message = typeof option === 'string' ? option : option.message ?? option.label ?? option.value ?? ''
     if (!message) return
     setSubmitted(true)
-    try { setSession(await modifyStyleSession(session.session, message, wardrobeItems)); setSubmitted(true) } catch { if (extensionRuntime) setSubmitted(false); setApiError('Could not resolve that constraint yet. Please try again.') }
+    try { setSession(await modifyStyleSession(session.session, message, wardrobeItems, styleProfile)); setSubmitted(true) } catch { if (extensionRuntime) setSubmitted(false); setApiError('Could not resolve that constraint yet. Please try again.') }
+  }
+  const toggleProfileValue = (field: 'preferred_styles' | 'preferred_colors' | 'avoided_colors', value: string) => {
+    setProfileDraft(current => ({ ...current, [field]: current[field].includes(value) ? current[field].filter(item => item !== value) : [...current[field], value] }))
+  }
+  const saveProfile = async () => {
+    if (!profileDraft.shopping_fit || (!profileDraft.preferred_styles.length && !profileDraft.preferred_colors.length)) return
+    try {
+      const saved = await saveStyleProfile(profileDraft)
+      setStyleProfile(saved); setProfileDraft(saved); setProfileSaved(true); setProfileOpen(false); setApiError('')
+    } catch { setApiError('Could not save your style profile. Check the FastAPI service.') }
   }
   if (extensionRuntime) return <div className="extension-shell">
     <header className="extension-header"><div className="extension-brand"><span className="brand-mark">a</span><strong>AURA</strong></div><div className="extension-live-data" aria-label="Live service status"><span className={liveStatus.vision ? 'is-live' : ''}>Vision: {liveStatus.vision ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.apify ? 'is-live' : ''}>Apify: {liveStatus.apify ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.cartesia ? 'is-live' : ''}>Cartesia: {liveStatus.cartesia ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.fetch ? 'is-live' : ''}>Fetch: {liveStatus.fetch ? 'LIVE' : 'unavailable'}</span></div><div className="extension-header-actions"><span className="extension-status"><i />{isPlanning ? 'Planning…' : isModifying ? 'Replanning…' : submitted ? 'Plan active' : 'Ready'}</span><button className="extension-reset" onClick={resetDemo}>Reset demo</button><button className="extension-clear-memory" onClick={() => void clearAllWardrobeMemory()} disabled={!wardrobeItems.length}>Clear memory</button></div></header>
@@ -447,6 +465,8 @@ function App() {
         <span className="eyebrow">PERSONAL SHOPPING AGENT</span>
         <h1>What are you planning?</h1>
         <p className="extension-hint">Tell Aura where you’re going, what you need, and your limits.</p>
+        {(!profileSaved || profileOpen) && <section className="extension-profile-card"><div className="extension-section-head"><div><span className="eyebrow">FIRST-RUN STYLE PROFILE</span><strong>{profileOpen ? 'Edit your style' : 'Personalize Aura first'}</strong></div>{profileSaved && <button onClick={() => setProfileOpen(false)}>Close</button>}</div><p>Aura uses this profile to rank real products. Fit is optional to share and is never inferred from photos.</p><div className="profile-field"><label>Clothing fit</label><div className="profile-options">{[['mens', "Men’s"], ['womens', "Women’s"], ['unisex', 'Unisex / all'], ['prefer_not_to_say', 'Prefer not to say']].map(([value, label]) => <button key={value} className={profileDraft.shopping_fit === value ? 'selected' : ''} onClick={() => setProfileDraft(current => ({ ...current, shopping_fit: value as StyleProfile['shopping_fit'] }))}>{label}</button>)}</div></div><div className="profile-field"><label>Style tags</label><div className="profile-options">{['Minimalist', 'Smart casual', 'Streetwear', 'Casual', 'Athleisure', 'Preppy', 'Vintage', 'Formal'].map(value => <button key={value} className={profileDraft.preferred_styles.includes(value.toLowerCase()) ? 'selected' : ''} onClick={() => toggleProfileValue('preferred_styles', value.toLowerCase())}>{value}</button>)}</div></div><div className="profile-field"><label>Preferred colors</label><div className="profile-options">{['Neutral', 'Black', 'White', 'Navy', 'Blue', 'Earth tones'].map(value => <button key={value} className={profileDraft.preferred_colors.includes(value.toLowerCase()) ? 'selected' : ''} onClick={() => toggleProfileValue('preferred_colors', value.toLowerCase())}>{value}</button>)}</div></div><div className="profile-row"><label>Usual size <input value={profileDraft.usual_size} onChange={event => setProfileDraft(current => ({ ...current, usual_size: event.target.value }))} placeholder="Optional" /></label><label>Budget / outfit <input type="number" value={profileDraft.default_budget_per_outfit ?? ''} onChange={event => setProfileDraft(current => ({ ...current, default_budget_per_outfit: event.target.value ? Number(event.target.value) : null }))} placeholder="Optional" /></label></div><button className="extension-primary profile-save" disabled={!profileDraft.shopping_fit || (!profileDraft.preferred_styles.length && !profileDraft.preferred_colors.length)} onClick={() => void saveProfile()}>{profileSaved ? 'Save style profile' : 'Save and continue'} <span>→</span></button></section>}
+        {profileSaved && !profileOpen && <div className="extension-profile-loaded">✓ Using your style: {profileDraft.shopping_fit === 'mens' ? 'Men’s fit' : profileDraft.shopping_fit === 'womens' ? 'Women’s fit' : profileDraft.shopping_fit === 'unisex' ? 'Unisex fit' : 'Fit private'} · {[...profileDraft.preferred_styles, ...profileDraft.preferred_colors].slice(0, 3).join(' · ')} <button onClick={() => setProfileOpen(true)}>Edit style profile</button></div>}
         {(isPlanning || isModifying) && <div className="extension-loading" role="status">{isModifying ? 'Replanning outfit 2…' : 'Planning outfits…'}</div>}
         {pageContext?.product?.name ? <div className="extension-current-product"><div className="extension-current-image" style={{ backgroundImage: pageContext.product.image ? `url(${pageContext.product.image})` : undefined }} /><div><span className="eyebrow">ACTIVE SHOPPING PAGE</span><strong>{pageContext.product.name}</strong><small>{pageContext.product.brand ? `${pageContext.product.brand} · ` : ''}{pageContext.product.price != null && pageContext.product.price !== '' ? `${pageContext.product.currency || '$'}${pageContext.product.price}` : 'Price unavailable'}</small><small className={activeProductComplete ? 'extension-detection-ok' : 'extension-wardrobe-error'}>{activeProductComplete ? `Product detected · ${pageContext.extraction_quality?.status}` : `Live product data incomplete — ${pageContext.extraction_quality?.reason || 'decision unavailable'}`}</small></div><span className="extension-context-check">{activeProductComplete ? 'Decision-ready product' : 'partial'}</span></div> : <div className="extension-page-note"><span>{productDetectionState === 'refreshing' ? 'Refreshing product detection…' : productDetectionError || 'Open a retailer product page and Aura will capture its name, image, price, and link here.'}</span></div>}
         <button className="extension-refresh-product" onClick={() => void refreshProductDetection()} disabled={productDetectionState === 'refreshing'}>{productDetectionState === 'refreshing' ? 'Refreshing…' : 'Refresh product detection'}</button>

@@ -37,3 +37,9 @@ export interface ProductDecision {
 export interface LiveStatus {
   vision: boolean; apify: boolean; cartesia: boolean; fetch: boolean
 }
+export interface StyleProfile {
+  shopping_fit: 'mens' | 'womens' | 'unisex' | 'prefer_not_to_say' | null
+  preferred_styles: string[]; preferred_colors: string[]; avoided_colors: string[]
+  usual_size: string; default_budget_per_outfit: number | null
+  preference_tags: string[]
+}

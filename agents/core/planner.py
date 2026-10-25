@@ -127,12 +127,17 @@ class TripPlanner:
 
     def _base_search(self, query_core: str, category: str | None, max_price=None, broad=False,
                      extra_style: list[str] | None = None) -> dict:
-        styles = list(extra_style or []) + list(self.request.get("styles") or [])
-        word = styles[0] if styles else ""
+        profile_styles = list((self.profile or {}).get("preferred_styles") or [])
+        fit = (self.profile or {}).get("shopping_fit")
+        fit_label = {"mens": "men's", "womens": "women's", "unisex": "unisex"}.get(fit, "")
+        styles = list(extra_style or []) + list(self.request.get("styles") or []) + profile_styles
+        word = " ".join(dict.fromkeys(([fit_label] if fit_label else []) + styles[:3]))
         colors = [] if broad else [c for c in self.request.get("preferred_colors") or [] if c not in ("neutral", "neutrals")]
-        tags = [] if broad else (styles[:2] + list(self.request.get("occasions") or [])[:2])
+        profile_colors = list((self.profile or {}).get("preferred_colors") or [])
+        colors = colors or [c for c in profile_colors if c not in ("neutral", "neutrals")]
+        tags = [] if broad else (styles[:3] + list(self.request.get("occasions") or [])[:2])
         if max_price is None:
-            max_price = self.request.get("per_outfit_budget")
+            max_price = self.request.get("per_outfit_budget") or (self.profile or {}).get("default_budget_per_outfit")
         return make_search_request(f"{word} {query_core}".strip(), category, colors, tags, max_price, 20)
 
     # ------------------------------------------------------------------ initial plan

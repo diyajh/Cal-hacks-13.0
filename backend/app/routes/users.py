@@ -4,7 +4,6 @@ from app.services.wardrobe_store import WardrobeStore, create_store
 
 router = APIRouter(prefix="/users")
 
-profiles = {}
 wardrobe_store: WardrobeStore = create_store()
 
 
@@ -16,13 +15,17 @@ def configure_wardrobe_store(database_url: str) -> None:
 
 @router.put("/{user_id}/profile")
 def save_profile(user_id: str, profile: UserProfile):
-    profiles[user_id] = profile
-    return profile
+    return wardrobe_store.save_profile(user_id, profile)
 
 
 @router.get("/{user_id}/profile")
 def get_profile(user_id: str):
-    return profiles.get(user_id, UserProfile())
+    return wardrobe_store.get_profile(user_id)
+
+
+@router.delete("/{user_id}/profile")
+def delete_profile(user_id: str):
+    return {"deleted": wardrobe_store.delete_profile(user_id)}
 
 
 @router.post("/{user_id}/wardrobe")

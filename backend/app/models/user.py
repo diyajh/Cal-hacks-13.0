@@ -5,11 +5,14 @@ from pydantic import BaseModel
 
 
 class UserProfile(BaseModel):
+    shopping_fit: Optional[str] = None
     preferred_styles: List[str] = []
     preferred_colors: List[str] = []
     avoided_styles: List[str] = []
     avoided_colors: List[str] = []
+    usual_size: Optional[str] = None
     typical_budget: Optional[float] = None
+    default_budget_per_outfit: Optional[float] = None
     preference_tags: List[str] = []
 
 

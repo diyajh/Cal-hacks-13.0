@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from app.models.user import WardrobeItem
+from app.models.user import UserProfile, WardrobeItem
 
 
 def _utc_now() -> datetime:
@@ -61,6 +61,14 @@ class WardrobeStore:
             """)
             connection.execute("CREATE INDEX IF NOT EXISTS idx_wardrobe_user ON wardrobe_items(user_id)")
             connection.execute("CREATE INDEX IF NOT EXISTS idx_wardrobe_expiry ON wardrobe_items(expires_at)")
+            connection.execute("""
+                CREATE TABLE IF NOT EXISTS user_profiles (
+                    user_id TEXT PRIMARY KEY,
+                    profile_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+            """)
 
     @staticmethod
     def _row_to_item(row: sqlite3.Row) -> WardrobeItem:
@@ -138,6 +146,34 @@ class WardrobeStore:
         with self._connect() as connection:
             result = connection.execute("DELETE FROM wardrobe_items WHERE user_id=?", (user_id,))
         return result.rowcount
+
+    def get_profile(self, user_id: str) -> UserProfile:
+        import json
+        with self._connect() as connection:
+            row = connection.execute("SELECT profile_json FROM user_profiles WHERE user_id=?", (user_id,)).fetchone()
+        if not row:
+            return UserProfile()
+        try:
+            return UserProfile.model_validate(json.loads(row["profile_json"]))
+        except (ValueError, TypeError):
+            return UserProfile()
+
+    def save_profile(self, user_id: str, profile: UserProfile) -> UserProfile:
+        import json
+        now = _utc_now().isoformat()
+        payload = json.dumps(profile.model_dump(mode="json"), sort_keys=True)
+        with self._connect() as connection:
+            connection.execute("""
+                INSERT INTO user_profiles(user_id, profile_json, created_at, updated_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET profile_json=excluded.profile_json, updated_at=excluded.updated_at
+            """, (user_id, payload, now, now))
+        return profile
+
+    def delete_profile(self, user_id: str) -> bool:
+        with self._connect() as connection:
+            result = connection.execute("DELETE FROM user_profiles WHERE user_id=?", (user_id,))
+        return result.rowcount > 0
 
 
 def create_store(database_url: str | None = None) -> WardrobeStore:

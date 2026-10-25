@@ -164,6 +164,16 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
     emit(make_event(session_id, ORCH, "request_received", "Understanding your request…", "working"))
     parsed = parse_request(raw_request, session_id, user_id, wardrobe or [])
     request = parsed["request"]
+    if profile:
+        if not request.get("styles"):
+            request["styles"] = list(profile.get("preferred_styles") or [])
+        if not request.get("preferred_colors"):
+            request["preferred_colors"] = list(profile.get("preferred_colors") or [])
+        if not request.get("avoid"):
+            request["avoid"] = list(profile.get("avoided_colors") or [])
+    if request.get("per_outfit_budget") is None and profile and profile.get("default_budget_per_outfit") is not None:
+        request["per_outfit_budget"] = profile["default_budget_per_outfit"]
+        request["hard_constraints"], request["soft_preferences"] = derive_constraint_lists(request, request)
     wardrobe_all = list(wardrobe or []) + parsed["new_wardrobe_items"]
     log.info("plan inventory count=%d ids=%s categories=%s sources=%s", len(wardrobe_all),
              [w.get("id") for w in wardrobe_all], [w.get("category") for w in wardrobe_all],

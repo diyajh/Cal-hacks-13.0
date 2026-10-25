@@ -5,6 +5,7 @@ from typing import Optional
 import logging
 
 from app.routes import users
+from app.models.user import UserProfile
 from app.config import load_settings
 from app.services.wardrobe_decision import compare_product
 
@@ -42,6 +43,7 @@ class PlanRequest(BaseModel):
     user_id: str
     session_id: str
     wardrobe: list[dict] = []
+    profile: Optional[UserProfile] = None
 
 
 class ModifyRequest(BaseModel):
@@ -50,6 +52,7 @@ class ModifyRequest(BaseModel):
     message: str
     target_outfit_id: Optional[str] = None
     wardrobe: list[dict] = []
+    profile: Optional[UserProfile] = None
 
 
 @router.post("/plan")
@@ -66,11 +69,7 @@ async def plan(req: PlanRequest):
         "raw_request": req.raw_request,
         "user_id": req.user_id,
         "session_id": req.session_id,
-        "profile": (
-            users.profiles[req.user_id].model_dump()
-            if req.user_id in users.profiles
-            else {}
-        ),
+        "profile": (req.profile or users.wardrobe_store.get_profile(req.user_id)).model_dump(mode="json"),
         "wardrobe": [
             *[item.model_dump(mode="json") for item in stored_wardrobe],
             *request_wardrobe,
@@ -95,11 +94,14 @@ async def plan(req: PlanRequest):
 
 @router.post("/modify")
 async def modify(req: ModifyRequest):
+    stored_profile = req.profile or users.wardrobe_store.get_profile(req.user_id)
+    payload = req.model_dump(mode="json")
+    payload["profile"] = stored_profile.model_dump(mode="json")
     try:
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(
                 f"{AGENTS_URL}/modify",
-                json=req.model_dump()
+                json=payload
             )
             response.raise_for_status()
             return response.json()

@@ -1,5 +1,5 @@
 import { demoSession } from '../mockData'
-import { AgentEvent, LiveStatus, Outfit, Product, ProductDecision, SessionConflict, StyleSession, WardrobeItem } from '../types'
+import { AgentEvent, LiveStatus, Outfit, Product, ProductDecision, SessionConflict, StyleProfile, StyleSession, WardrobeItem } from '../types'
 import { VoiceAgentResponse } from '../voiceAgent'
 
 /**
@@ -46,6 +46,18 @@ export async function deleteSavedWardrobe(itemId: string): Promise<void> {
 
 export async function clearSavedWardrobe(): Promise<void> {
   await request(`/users/${encodeURIComponent(USER_ID)}/wardrobe`, { method: 'DELETE' })
+}
+
+const emptyProfile = (): StyleProfile => ({ shopping_fit: null, preferred_styles: [], preferred_colors: [], avoided_colors: [], usual_size: '', default_budget_per_outfit: null, preference_tags: [] })
+export async function getStyleProfile(): Promise<StyleProfile> {
+  const profile = await request<Partial<StyleProfile>>(`/users/${encodeURIComponent(USER_ID)}/profile`)
+  return { ...emptyProfile(), ...profile, preferred_styles: profile.preferred_styles ?? [], preferred_colors: profile.preferred_colors ?? [], avoided_colors: profile.avoided_colors ?? [], preference_tags: profile.preference_tags ?? [] }
+}
+export async function saveStyleProfile(profile: StyleProfile): Promise<StyleProfile> {
+  return request<StyleProfile>(`/users/${encodeURIComponent(USER_ID)}/profile`, { method: 'PUT', body: JSON.stringify(profile) })
+}
+export async function deleteStyleProfile(): Promise<void> {
+  await request(`/users/${encodeURIComponent(USER_ID)}/profile`, { method: 'DELETE' })
 }
 
 export async function getLiveStatus(): Promise<LiveStatus> {
@@ -121,12 +133,12 @@ const newSessionId = () => typeof crypto !== 'undefined' && crypto.randomUUID
   ? crypto.randomUUID()
   : `session-${Date.now()}`
 
-export async function createStyleSession(prompt: string, sessionId = newSessionId(), wardrobe: WardrobeItem[] = []): Promise<StyleSession> {
+export async function createStyleSession(prompt: string, sessionId = newSessionId(), wardrobe: WardrobeItem[] = [], profile?: StyleProfile): Promise<StyleSession> {
   console.debug('[Aura client] plan request inventory', { count: wardrobe.length, ids: wardrobe.map(item => item.id), categories: wardrobe.map(item => item.category), sources: wardrobe.map(item => item.source ?? 'wardrobe') })
   const response = await request<any>('/shopping/plan', {
     method: 'POST',
     // Person 2's gateway forwards this request to Person 1 unchanged.
-    body: JSON.stringify({ raw_request: prompt, user_id: USER_ID, session_id: sessionId, wardrobe }),
+    body: JSON.stringify({ raw_request: prompt, user_id: USER_ID, session_id: sessionId, wardrobe, profile }),
   })
   const session = normalizeSession(response)
   console.debug('[Aura client] plan response summary', { reused: session.wardrobeReusedCount, candidateReused: session.candidateReusedCount, purchases: session.uniquePurchaseCount })
@@ -137,18 +149,18 @@ export async function getStyleSession(sessionId: string): Promise<StyleSession> 
   return request<StyleSession>(`/api/style-sessions/${encodeURIComponent(sessionId)}`)
 }
 
-export async function modifyStyleSession(sessionId: string, instruction: string, wardrobe: WardrobeItem[] = []): Promise<StyleSession> {
+export async function modifyStyleSession(sessionId: string, instruction: string, wardrobe: WardrobeItem[] = [], profile?: StyleProfile): Promise<StyleSession> {
   const response = await request<any>('/shopping/modify', {
     method: 'POST',
-    body: JSON.stringify({ session_id: sessionId, user_id: USER_ID, message: instruction, target_outfit_id: null, wardrobe }),
+    body: JSON.stringify({ session_id: sessionId, user_id: USER_ID, message: instruction, target_outfit_id: null, wardrobe, profile }),
   })
   return normalizeSession(response)
 }
 
 /** Cartesia stays server-side: the browser sends transcript text, never an API key. */
-export async function sendVoiceTurn(sessionId: string, transcript: string, wardrobe: WardrobeItem[] = []): Promise<VoiceAgentResponse> {
+export async function sendVoiceTurn(sessionId: string, transcript: string, wardrobe: WardrobeItem[] = [], profile?: StyleProfile): Promise<VoiceAgentResponse> {
   // Voice must use the same single planning request and session as typed input.
-  const styleSession = await createStyleSession(transcript, sessionId, wardrobe)
+  const styleSession = await createStyleSession(transcript, sessionId, wardrobe, profile)
   const response = await fetch(`${VOICE_API_BASE_URL}/api/voice-sessions/${encodeURIComponent(sessionId)}/speak`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
