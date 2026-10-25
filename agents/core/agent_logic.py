@@ -81,8 +81,11 @@ def _outfit_cost(outfit: dict) -> float:
                      if i["source_type"] == "product" and i["purchase_required"]), 2)
 
 
-def _complete(outfit: dict) -> bool:
+def _complete(outfit: dict, required_categories: list[str] | None = None) -> bool:
     cats = {(i["product"] or i["wardrobe_item"]).get("category") for i in outfit["items"]}
+    required = set(required_categories or [])
+    if required:
+        return required <= cats
     return "shoes" in cats and ("dress" in cats or {"top", "bottom"} <= cats)
 
 
@@ -97,7 +100,7 @@ def budget_agent_handle(session_id: str, request: dict, outfits: list[dict],
         if o["id"] not in check_ids:
             continue
         cost = _outfit_cost(o)
-        if not _complete(o):
+        if not _complete(o, request.get("required_categories")):
             v = make_violation("complete_outfit", "top+bottom or dress, plus shoes", "incomplete", o["id"],
                                f"{o['title']} is missing a piece.")
             violations.append(v)

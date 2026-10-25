@@ -108,7 +108,9 @@ def _conflict(remaining: list[dict], request: dict, planner: TripPlanner) -> dic
 
 def _finalize(planner: TripPlanner, request: dict, events: list[dict], remaining: list[dict],
               session_id: str, conflict: dict | None, intro: str | None = None) -> dict:
-    outfits = planner.to_contract_outfits()
+    # Never expose an outfit that failed a hard constraint as if it were a valid
+    # recommendation. The conflict response carries the honest explanation.
+    outfits = [] if remaining else planner.to_contract_outfits()
     unique: dict[str, float] = {}
     owned: dict[str, dict] = {}
     reused: dict[str, dict] = {}
@@ -128,7 +130,17 @@ def _finalize(planner: TripPlanner, request: dict, events: list[dict], remaining
     status = "completed" if ok else "needs_user_input"
     rec = empty_final_recommendation(session_id, status, "", request, events)
     rec.update({
-        "outfits": outfits, "total_new_purchase_cost": total, "total_budget": request.get("total_budget"),
+        "outfits": outfits, "total_new_purchase_cost": total,
+        "requested_budget": request.get("total_budget") if request.get("total_budget") is not None
+        else request.get("per_outfit_budget"),
+        "planned_spend": total,
+        "within_constraints": ok,
+        "remaining_budget": (round((request.get("total_budget") if request.get("total_budget") is not None
+                                     else request.get("per_outfit_budget")) - total, 2)
+                             if (request.get("total_budget") is not None or
+                                 (request.get("per_outfit_budget") is not None and
+                                  request.get("number_of_outfits") == 1)) else None),
+        "total_budget": request.get("total_budget"),
         "owned_items_used": list(owned.values()), "reused_items": list(reused.values()),
         "constraint_violations": remaining, "all_constraints_satisfied": ok,
         "wardrobe_reused_count": len(reused),
@@ -198,6 +210,8 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
         summary.append("style: " + ", ".join(request["styles"]))
     if request.get("required_items"):
         summary.append("must include: " + ", ".join(r["item"] for r in request["required_items"]))
+    if request.get("required_categories"):
+        summary.append("slots: " + ", ".join(request["required_categories"]))
     if request.get("avoid"):
         summary.append("avoid: " + ", ".join(request["avoid"]))
     if request.get("owned_item_references"):

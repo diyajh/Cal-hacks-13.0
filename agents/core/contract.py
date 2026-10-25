@@ -105,7 +105,7 @@ def product_fit_compatible(product: dict, shopping_fit: str | None) -> bool:
 
 SHOPPING_REQUEST_KEYS = [
     "session_id", "user_id", "raw_request", "location", "duration_days", "number_of_outfits",
-    "occasions", "styles", "preferred_colors", "avoid", "required_items", "per_outfit_budget",
+    "occasions", "styles", "preferred_colors", "avoid", "required_items", "required_categories", "per_outfit_budget",
     "total_budget", "currency", "owned_item_references", "additional_preferences",
     "hard_constraints", "soft_preferences",
 ]
@@ -128,6 +128,15 @@ def normalize_shopping_request(data: dict, session_id: str, user_id: str, raw_re
             "quantity": max(1, _int_or_none(it.get("quantity")) or 1),
             "required_for_outfit": target if isinstance(target, str) and target else None,
         })
+    required_categories = []
+    for category in data.get("required_categories") or []:
+        category = str(category).strip().lower()
+        if category in {"top", "bottom", "dress", "shoes", "outerwear", "accessory"} and category not in required_categories:
+            required_categories.append(category)
+    for item in req_items:
+        category = normalize_category(item["item"])
+        if category and category not in required_categories:
+            required_categories.append(category)
 
     req = {
         "session_id": session_id,
@@ -141,6 +150,7 @@ def normalize_shopping_request(data: dict, session_id: str, user_id: str, raw_re
         "preferred_colors": _str_list(data.get("preferred_colors")),
         "avoid": _str_list(data.get("avoid")),
         "required_items": req_items,
+        "required_categories": required_categories,
         "per_outfit_budget": money(data.get("per_outfit_budget")),
         "total_budget": money(data.get("total_budget")),
         "currency": CURRENCY,
@@ -165,6 +175,8 @@ def derive_constraint_lists(req: dict, data: dict | None = None) -> tuple[list[s
         hard.append("number_of_outfits")
     if req.get("required_items"):
         hard.append("required_items")
+    if req.get("required_categories"):
+        hard.append("required_categories")
     given_hard = _str_list((data or {}).get("hard_constraints"))
     if "avoid" in given_hard and req.get("avoid"):
         hard.append("avoid")
@@ -288,6 +300,10 @@ def empty_final_recommendation(session_id: str, status: str, message: str,
         "parsed_request": parsed_request or {},
         "outfits": [],
         "total_new_purchase_cost": 0.0,
+        "requested_budget": (parsed_request or {}).get("per_outfit_budget"),
+        "planned_spend": 0.0,
+        "within_constraints": False,
+        "remaining_budget": (parsed_request or {}).get("per_outfit_budget"),
         "total_budget": (parsed_request or {}).get("total_budget"),
         "owned_items_used": [],
         "reused_items": [],

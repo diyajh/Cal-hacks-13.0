@@ -23,6 +23,10 @@ DEFAULT_REUSE_LIMIT = 2
 PLURAL = {"top": "tops", "bottom": "bottoms", "dress": "dresses", "shoes": "shoes",
           "outerwear": "jackets", "accessory": "accessories"}
 WARDROBE_BONUS, OWNED_REF_BONUS, REUSE_BONUS = 12.0, 25.0, 6.0
+SMART_CASUAL_AVOID = (
+    "high heel", "high-heel", "platform", "platform heel", "platform shoe", "cuban heel",
+    "disco party", "wedding guest", "formal footwear",
+)
 
 
 def _usd(x: float) -> str:
@@ -31,6 +35,17 @@ def _usd(x: float) -> str:
 
 def _label(outfit_id: str) -> str:
     return outfit_id.replace("_", " ").capitalize()
+
+
+def _smart_casual_reject(item: dict, request: dict) -> bool:
+    styles = {str(s).lower() for s in (request.get("styles") or [])}
+    if not ("smart casual" in styles or {"smart", "casual"} <= styles):
+        return False
+    # An explicit request for one of these styles is an intentional override.
+    raw = str(request.get("raw_request") or "").lower()
+    if any(tx.term_in_text(term, raw) for term in SMART_CASUAL_AVOID):
+        return False
+    return any(tx.term_in_text(term, tx.product_text(item)) for term in SMART_CASUAL_AVOID)
 
 
 def normalize_wardrobe_item(item: dict, index: int = 0) -> dict:
@@ -123,7 +138,9 @@ class TripPlanner:
         products, evs = await self.bus.search(self.sid, search_request, reason, outfit_id)
         self.emit(evs)
         fit = (self.profile or {}).get("shopping_fit")
-        products = [p for p in products if product_fit_compatible(p, fit)]
+        products = [p for p in products
+                    if product_fit_compatible(p, fit)
+                    and not _smart_casual_reject(p, self.request)]
         for p in products:
             self.pool[p["id"]] = p
         return products
@@ -152,7 +169,8 @@ class TripPlanner:
         self.outfits = []
         for i in range(n):
             occ = occs[i % len(occs)]
-            template = ["dress", "shoes"] if occ in tx.DRESS_OCCASIONS else ["top", "bottom", "shoes"]
+            explicit_slots = list(self.request.get("required_categories") or [])
+            template = explicit_slots or (["dress", "shoes"] if occ in tx.DRESS_OCCASIONS else ["top", "bottom", "shoes"])
             self.outfits.append({
                 "id": f"outfit_{i + 1}", "day": ((i * days) // n) + 1 if days and n > days else i + 1, "occasion": occ,
                 "template": template, "picks": {s: None for s in template}, "required": {},
@@ -242,6 +260,8 @@ class TripPlanner:
             is_w = item in self.wardrobe
             if not is_w and not product_fit_compatible(item, (self.profile or {}).get("shopping_fit")):
                 continue
+            if not is_w and _smart_casual_reject(item, self.request):
+                continue
             cat = item.get("category")
             if cat != slot or (not is_w and item["id"] in o["excluded"]):
                 continue
@@ -297,11 +317,46 @@ class TripPlanner:
     def _build_outfit(self, o, announce=True):
         if "dress" in o["template"] and not o["required"].get("dress") and not self._candidates(o, "dress"):
             self._set_template(o, ["top", "bottom", "shoes"])
+        # Choose the complete combination against the remaining outfit budget,
+        # rather than choosing each product independently and checking the sum later.
+        # This is intentionally deterministic and small (the search agent already
+        # limits each slot's candidate list).
+        budget = self.request.get("per_outfit_budget")
+        if budget is not None and not any(p and p.get("locked") for p in o["picks"].values()):
+            options = [self._candidates(o, slot, allow_poor_fit=False)[:12] for slot in o["template"]]
+            best = None
+
+            def visit(index, chosen, cost, score):
+                nonlocal best
+                if index == len(options):
+                    candidate = (score, -cost, chosen[:])
+                    if best is None or candidate[:2] > best[:2]:
+                        best = candidate
+                    return
+                for entry in options[index]:
+                    _, _, item, is_w, _ = entry
+                    next_cost = cost if is_w else cost + float(item.get("price") or 0)
+                    if next_cost <= budget:
+                        visit(index + 1, chosen + [entry], next_cost, score + entry[0])
+
+            if all(options):
+                visit(0, [], 0.0, 0.0)
+            if best:
+                for slot, entry in zip(o["template"], best[2]):
+                    self._pick(o, slot, entry)
+                if announce:
+                    self.ev("outfit_created", f"Created {_label(o['id'])} (Day {o['day']}, {o['occasion']}): "
+                            + self._describe(o) + f" — new purchases {_usd(self.outfit_cost(o))}", o["id"])
+                return
         for slot in o["template"]:
             cur = o["picks"].get(slot)
             if cur and cur.get("locked"):
                 continue
-            cands = self._candidates(o, slot, allow_poor_fit=False) or self._candidates(o, slot)
+            budget = self.request.get("per_outfit_budget")
+            remaining = round(budget - self.outfit_cost(o), 2) if budget is not None else None
+            cands = self._candidates(o, slot, max_price=remaining, allow_poor_fit=False)
+            if not cands and remaining is None:
+                cands = self._candidates(o, slot)
             o["picks"][slot] = None
             if cands:
                 self._pick(o, slot, cands[0])
@@ -387,9 +442,12 @@ class TripPlanner:
         kind = o["required"].get(slot)
         self.ev("replanning", f"No suitable {kind or slot} yet for {_label(o['id'])}; broadening the search.",
                 o["id"], status="working")
-        await self._search(self._base_search(kind or CAT_QUERY[slot], slot, broad=True), "broadened search", o["id"])
+        budget = self.request.get("per_outfit_budget")
+        remaining = round(budget - self.outfit_cost(o), 2) if budget is not None else None
+        await self._search(self._base_search(kind or CAT_QUERY[slot], slot, max_price=remaining, broad=True),
+                           "broadened search", o["id"])
         await self._style(list(self.pool.values()) + self.wardrobe, [self.ctx_key(o)], o["id"])
-        cands = self._candidates(o, slot)
+        cands = self._candidates(o, slot, max_price=remaining)
         if cands:
             self._pick(o, slot, cands[0])
             self.ev("replacement_found", f"Found {self._describe_item(cands[0])} for {_label(o['id'])}", o["id"])

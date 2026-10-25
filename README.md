@@ -1,60 +1,127 @@
-# Aura — autonomous personal shopping agent
+# Aura
 
-Aura turns a natural-language trip brief into constraint-checked outfits,
-using live product research, wardrobe memory, and multi-agent replanning.
+Aura is a Chrome side-panel shopping concierge. A user describes a trip or occasion by voice or text, and Aura combines their saved wardrobe, profile constraints, budget, live retailer research, and agent reasoning into explainable outfit recommendations. It can also compare the product on the current browser page against the wardrobe and explain a BUY, SKIP, or “needs more detail” decision.
 
-## Repository layout
+Aura is a planning and discovery experience. It does not collect payment-card details, provide checkout, or claim direct retailer checkout.
 
-- `src/` — React/TypeScript product experience and backend adapter.
-- `backend/` — FastAPI boundary for voice, agent events, and session APIs.
-- `public/manifest.json` — Manifest V3 extension shell for the Aura side panel.
+## Architecture
 
-## Security boundary
+```text
+Chrome side panel / React + Vite (:5173)
+        │
+        ▼
+FastAPI gateway (:8019)
+   ├── Cartesia Ink STT / Sonic TTS
+   ├── vision provider for wardrobe photos
+   ├── SQLite wardrobe metadata
+   ├── live Apify product search
+   └── Fetch/uAgents orchestrator (:8017)
+             ├── request parsing
+             ├── style and profile filtering
+             ├── budget and constraint checks
+             └── replanning
+```
 
-Cartesia credentials are server-only. Do not put them in `VITE_*` variables,
-the React bundle, screenshots, or commits. Copy `backend/.env.example` to
-`backend/.env` locally and populate it with a rotated key.
+The extension content script extracts the active retailer page using JSON-LD, OpenGraph, and visible-page fallbacks. Only structured wardrobe metadata is persisted; uploaded photos are analyzed and discarded rather than stored.
 
-## Local development
+Fetch/uAgents is used as the local orchestration layer in this repository. Agentverse/ACP registration and direct retailer checkout are not prerequisites or claims of this demo.
+
+## Prerequisites
+
+- Node.js 18+
+- Python 3.10+
+- Google Chrome with Developer mode enabled
+- Optional live credentials: Apify, one vision provider, and Cartesia
+
+## Setup
 
 ```bash
+git clone <repository-url>
+cd Cal-hacks-13.0
 npm install
-npm run dev
-
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -r backend/requirements.txt
 ```
 
-For the extension build, run `npm run build`, then open `chrome://extensions`,
-enable Developer mode, choose **Load unpacked**, and select the repository's
-`dist/` folder. Start the backend separately and set `VITE_API_BASE_URL` before
-starting Vite when testing live planning locally.
+Copy the templates and fill them locally. Never commit populated environment files:
 
-The extension uses a side panel plus a content script that extracts structured
-page metadata (title, URL, description, and product JSON-LD when available).
-The browser sends that context to the server; Cartesia Ink STT and Sonic TTS
-remain behind the FastAPI boundary and no API key enters the extension bundle.
-
-## Live wardrobe and product evidence
-
-The judged extension flow uses the active retailer page as the product source.
-Open the side panel on a product page, upload one or more wardrobe photos, and
-Aura sends them to the configured server-side vision provider. Detected items
-can be corrected or removed before the deterministic product comparison runs.
-The comparison will not return `SKIP` until wardrobe analysis has completed.
-
-For local live data, add these server-only values to `backend/.env`:
-
-```env
-APIFY_API_TOKEN=...
-OPENAI_API_KEY=...       # or ANTHROPIC_API_KEY=...
-VISION_MODEL=            # optional provider-specific override
+```bash
+cp .env.example .env
+cp backend/.env.example backend/.env
+cp agents/.env.example agents/.env
 ```
 
-Without `APIFY_API_TOKEN`, product search reports `LIVE SEARCH NOT CONFIGURED`
-and does not fabricate fallback retailer results. Without a vision key, the
-upload UI reports `VISION NOT CONFIGURED`; the active real browser product
-continues to be shown with its extraction-quality status.
+The root `.env` is used by Vite. Server credentials belong in `backend/.env`; agent configuration belongs in `agents/.env`. Both are ignored by Git.
+
+## Environment variables
+
+Required for the complete live demo:
+
+- `APIFY_API_TOKEN` — live product search.
+- `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` — wardrobe-photo analysis.
+- `CARTESIA_API_KEY` — browser voice transcription and response audio.
+- `AGENTS_BASE_URL=http://localhost:8017` — FastAPI-to-agent gateway.
+- `PRODUCT_SEARCH_URL=http://localhost:8019/products/search` — agent-to-FastAPI live search route.
+- `AGENTS_PORT=8017` — local uAgents REST port.
+- `AURA_DATABASE_URL=sqlite:///backend/data/aura.sqlite3` — durable wardrobe metadata.
+- `VITE_API_BASE_URL=http://localhost:8019` — frontend gateway.
+
+Optional settings include `VISION_MODEL`, Cartesia model/voice variables, `ALLOWED_ORIGINS`, `PRODUCT_SEARCH_TIMEOUT`, and `REPLAN_SEARCH`. Use empty values in the templates until you have real credentials. Do not put server keys in `VITE_*` variables.
+
+## Start the local services
+
+Use separate terminals from the repository root:
+
+```bash
+AGENTS_PORT=8017 PYTHONPATH=. backend/.venv/bin/python -m agents.fetch.run_bureau
+```
+
+Start FastAPI on the gateway port:
+
+```bash
+AGENTS_BASE_URL=http://localhost:8017 backend/.venv/bin/uvicorn backend.app.main:app --reload --port 8019
+```
+
+Start Vite:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8019 npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## Build and load the extension
+
+```bash
+npm run build
+```
+
+Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the repository `dist/` directory. Open a real retailer product page, open Aura from the side panel, and use **Refresh product detection** if needed.
+
+## Demo flow
+
+Use this request:
+
+> One date-night outfit under $100 with a top, bottom, and shoes.
+
+Aura parses all three required slots, reuses compatible saved wardrobe pieces at $0, searches live products for remaining slots, filters products against the profile, and rejects any complete outfit whose combined new-product total exceeds $100. The final plan shows the exact look count, planned spend, reuse, reasoning, and retailer links available from the live response.
+
+For voice, say the same sentence after microphone permission is granted. Voice and typed requests use the same planning submit path.
+
+## Tests and checks
+
+```bash
+npm run build
+node tests/ui_polish.test.cjs
+node tests/planner_budget_ui.test.cjs
+node --check public/content.js
+node --check public/background.js
+PYTHONPATH=backend backend/.venv/bin/python -m unittest discover -s backend/tests -v
+PYTHONPATH=. backend/.venv/bin/python -m unittest discover -s agents/tests -v
+python3 -m compileall -q backend agents
+git diff --check
+```
+
+## Privacy and limitations
+
+Aura stores structured wardrobe attributes such as category, color, style, confidence, and memory status in local SQLite metadata. It does not store uploaded wardrobe photos. Temporary memory expires after 30 days; remembered items remain until removed. Resetting a demo session does not delete persistent wardrobe memory. Users can edit, delete individual items, or clear all wardrobe memory.
+
+Live product availability, retailer fields, images, prices, and links depend on the active retailer page and Apify response. Missing or incomplete product data is surfaced rather than fabricated. Without a vision key, Apify token, or Cartesia key, the relevant capability reports a clear unavailable state. The demo does not provide payment processing or checkout.

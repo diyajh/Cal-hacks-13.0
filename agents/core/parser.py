@@ -220,9 +220,18 @@ def rule_parse(text: str) -> dict:
     elif "beach" in occasions and len(occasions) == 1 and (data.get("duration_days") or 0) > 1:
         occasions = ["beach", "brunch", "sightseeing", "dinner"]
 
+    required_categories = []
+    trigger = REQUIRE_TRIGGER_RE.search(low)
+    if trigger:
+        requirement_text = low[trigger.end():]
+        for noun, category in sorted(tx.GARMENTS.items(), key=lambda pair: len(pair[0]), reverse=True):
+            if re.search(r"(?<![a-z])" + re.escape(noun) + r"(?![a-z])", requirement_text) and category not in required_categories:
+                required_categories.append(category)
+
     data.update({
         "styles": styles, "preferred_colors": preferred, "avoid": avoid,
-        "required_items": required, "occasions": occasions, "additional_preferences": additional,
+        "required_items": required, "required_categories": required_categories,
+        "occasions": occasions, "additional_preferences": additional,
         "hard_constraints": ["avoid"] if strong_avoid else [],
         "_owned_phrases": owned_phrases,
         "_remember": bool(REMEMBER_RE.search(t)),
@@ -300,6 +309,9 @@ def parse_request(raw_request: str, session_id: str, user_id: str,
                 merged[key] = llm[key]
         if llm.get("strong_avoid"):
             merged["hard_constraints"] = ["avoid"]
+    merged["required_categories"] = list(dict.fromkeys(
+        (rules.get("required_categories") or []) + (merged.get("required_categories") or [])
+    ))
 
     # A budget/count collision is a parser error, not a valid request. Prefer
     # an explicit rule-based count, then the duration default; otherwise reject
@@ -324,7 +336,7 @@ def parse_request(raw_request: str, session_id: str, user_id: str,
     request = normalize_shopping_request(merged, session_id, user_id, raw_request)
 
     clarification = None
-    understood = any([request["number_of_outfits"], request["styles"], request["required_items"],
+    understood = any([request["number_of_outfits"], request["styles"], request["required_items"], request["required_categories"],
                       request["occasions"], request["per_outfit_budget"], request["total_budget"]])
     if not understood:
         clarification = ("I couldn't tell what you'd like me to shop for. Could you tell me the occasion or trip, "

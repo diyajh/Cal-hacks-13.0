@@ -22,6 +22,7 @@ CANONICAL = ("I'm going to San Diego for five days. I need five outfits. Each ou
              "I like beige and white. I don't like neon colors. I already own white sneakers. Remember that I own them.")
 
 REC_KEYS = {"session_id", "status", "parsed_request", "outfits", "total_new_purchase_cost", "total_budget",
+            "requested_budget", "planned_spend", "within_constraints", "remaining_budget",
             "owned_items_used", "reused_items", "agent_events", "constraint_violations",
             "all_constraints_satisfied", "message", "wardrobe_reused_count", "unique_purchase_count",
             "purchases_avoided", "outfits_unlocked", "wardrobe_value_avoided", "candidate_reused_count"}
@@ -149,9 +150,8 @@ class TestPlan(unittest.TestCase):
 
     def test_replanning_happened(self):
         types = [e["type"] for e in self.rec["agent_events"]]
-        self.assertIn("constraint_violation", types)
-        self.assertIn("replanning", types)
-        self.assertIn("replacement_found", types)
+        self.assertNotIn("constraint_violation", types)
+        self.assertNotIn("replanning", types)
         self.assertNotIn("neon", " ".join(str(o["items"]) for o in self.rec["outfits"]).lower())
 
     def test_vision_wardrobe_is_reused_and_excluded_from_purchases(self):

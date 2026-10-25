@@ -137,13 +137,18 @@ const newSessionId = () => typeof crypto !== 'undefined' && crypto.randomUUID
 
 export async function createStyleSession(prompt: string, sessionId = newSessionId(), wardrobe: WardrobeItem[] = [], profile?: StyleProfile): Promise<StyleSession> {
   console.debug('[Aura client] plan request inventory', { count: wardrobe.length, ids: wardrobe.map(item => item.id), categories: wardrobe.map(item => item.category), sources: wardrobe.map(item => item.source ?? 'wardrobe') })
+  const payload = { raw_request: prompt, user_id: USER_ID, session_id: sessionId, wardrobe, profile }
+  if ((import.meta as any).env?.DEV) {
+    const safeWardrobe = wardrobe.map(({ image, image_url, ...item }) => item)
+    console.debug('[Aura client] outgoing /shopping/plan payload', { ...payload, wardrobe: safeWardrobe })
+  }
   const response = await request<any>('/shopping/plan', {
     method: 'POST',
     // Person 2's gateway forwards this request to Person 1 unchanged.
-    body: JSON.stringify({ raw_request: prompt, user_id: USER_ID, session_id: sessionId, wardrobe, profile }),
+    body: JSON.stringify(payload),
   })
   const session = normalizeSession(response)
-  console.debug('[Aura client] plan response summary', { reused: session.wardrobeReusedCount, candidateReused: session.candidateReusedCount, purchases: session.uniquePurchaseCount })
+  if ((import.meta as any).env?.DEV) console.debug('[Aura client] /shopping/plan returned', { status: 'ok', looks: session.outfits.length, plannedSpend: session.newPurchaseCost, withinConstraints: session.constraintStatus === 'satisfied' })
   return session
 }
 
@@ -181,6 +186,17 @@ export async function sendVoiceTurn(sessionId: string, transcript: string, wardr
     audioDataUrl: response.audio_data_url,
     styleSession,
   }
+}
+
+export async function speakVoiceResponse(sessionId: string, text: string): Promise<{ audioDataUrl?: string }> {
+  const response = await fetch(`${VOICE_API_BASE_URL}/api/voice-sessions/${encodeURIComponent(sessionId)}/speak`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  })
+  if (!response.ok) throw new Error(`Aura voice API ${response.status}: ${await response.text()}`)
+  const result = await response.json() as { audio_data_url?: string }
+  return { audioDataUrl: result.audio_data_url }
 }
 
 export async function transcribeVoiceAudio(sessionId: string, audio: Blob): Promise<{ transcript: string; model: string }> {

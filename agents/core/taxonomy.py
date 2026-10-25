@@ -22,7 +22,7 @@ GARMENTS = {
     "blouse": "top", "tank": "top", "cami": "top", "camisole": "top", "bodysuit": "top",
     "sweater": "top", "crop top": "top", "halter": "top", "tube top": "top", "polo": "top",
     "skirt": "bottom", "skirts": "bottom", "shorts": "bottom", "pants": "bottom",
-    "trousers": "bottom", "jeans": "bottom", "leggings": "bottom", "bottoms": "bottom",
+    "trousers": "bottom", "jeans": "bottom", "leggings": "bottom", "bottom": "bottom", "bottoms": "bottom",
     "dress": "dress", "sundress": "dress", "romper": "dress", "jumpsuit": "dress",
     "sneakers": "shoes", "sandals": "shoes", "heels": "shoes", "boots": "shoes", "shoes": "shoes",
     "flats": "shoes", "loafers": "shoes", "espadrilles": "shoes", "slides": "shoes", "mules": "shoes",
