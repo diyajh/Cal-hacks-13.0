@@ -154,6 +154,35 @@ class TestPlan(unittest.TestCase):
         self.assertTrue(r["all_constraints_satisfied"])
 
 
+class TestWardrobe(unittest.TestCase):
+    """Stored wardrobe items (Person 2's DB) are candidates with an advantage, never forced."""
+    W = [
+        {"id": "w_heels", "user_id": "u", "name": "Black Strappy Heels", "category": "Shoes", "colors": ["Black"],
+         "tags": ["Evening"], "memory_type": "remembered", "created_at": "2026-10-01T00:00:00Z", "expires_at": None},
+        {"id": "w_coat", "user_id": "u", "name": "Winter Wool Coat", "category": None, "colors": ["grey"], "tags": [],
+         "memory_type": "remembered", "created_at": "2026-10-01T00:00:00Z", "expires_at": None},
+        {"id": "w_neon", "user_id": "u", "name": "Neon Running Shoes", "category": "shoes", "colors": ["neon green"],
+         "tags": ["athletic"], "memory_type": "remembered", "created_at": "2026-10-01T00:00:00Z", "expires_at": None},
+        {"id": "w_expired", "user_id": "u", "name": "Old Temp Tee", "category": "top", "colors": [], "tags": [],
+         "memory_type": "temporary", "created_at": "2020-01-01T00:00:00Z", "expires_at": "2020-01-31T00:00:00Z"},
+    ]
+
+    def test_wardrobe_candidates(self):
+        res = run(plan_shopping("4 days in San Diego, 4 outfits under $50 each, beachy, I hate neon", "u", "s_ward",
+                                wardrobe=self.W))
+        rec = res["final_recommendation"]
+        selected = {i["wardrobe_item"]["id"] for o in rec["outfits"] for i in o["items"] if i["wardrobe_item"]}
+        used = {i["wardrobe_item"]["id"]: i["used_in_outfits"] for i in rec["owned_items_used"]}
+        self.assertEqual(set(used), selected)                       # only pieces actually selected
+        self.assertIn("w_heels", used)                              # "Shoes" category normalized and used
+        occ = {o["id"]: o["occasion"] for o in rec["outfits"]}
+        self.assertTrue(all(occ[oid] == "dinner" for oid in used["w_heels"]))  # only where they fit
+        self.assertNotIn("w_neon", selected)                        # avoided color never used
+        self.assertNotIn("w_expired", selected)                     # expired temporary memory ignored
+        self.assertNotIn("w_coat", selected)                        # not forced into an outfit
+        self.assertTrue(rec["all_constraints_satisfied"])
+
+
 class TestConflict(unittest.TestCase):
     def test_impossible_budget_asks_user(self):
         res = run(plan_shopping("2 outfits for brunch, each outfit under $15, must include a satin dress", "u", "s_conf"))
