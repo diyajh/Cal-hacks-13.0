@@ -2,6 +2,7 @@ import unittest
 
 from agents.core.planner import TripPlanner
 from agents.products.client import make_search_request
+from agents.core.contract import product_fit_compatible
 
 
 class ProfilePlanningTests(unittest.TestCase):
@@ -19,6 +20,13 @@ class ProfilePlanningTests(unittest.TestCase):
         self.assertEqual(request["max_price"], 50)
         self.assertEqual(request["colors"], [])
         self.assertIn("smart casual", request["tags"])
+        self.assertEqual(request["shopping_fit"], "mens")
+
+    def test_fit_filter_rejects_incompatible_catalog_language(self):
+        self.assertFalse(product_fit_compatible({"name": "Women's blouse", "category": "top"}, "mens"))
+        self.assertFalse(product_fit_compatible({"name": "Men's overshirt", "category": "top"}, "womens"))
+        self.assertTrue(product_fit_compatible({"name": "Classic cotton shirt", "category": "top"}, "unisex"))
+        self.assertTrue(product_fit_compatible({"name": "Linen shirt", "category": "top"}, "mens"))
 
 
 if __name__ == "__main__":

@@ -192,13 +192,16 @@ function App() {
     setWardrobePreviews(current => [...current, ...selected.map(file => URL.createObjectURL(file))])
     setWardrobeState('analyzing'); setWardrobeError('')
     try {
-      const analyzed = (await Promise.all(selected.map(analyzeWardrobeImage))).flat()
+      const results = await Promise.allSettled(selected.map(analyzeWardrobeImage))
+      const analyzed = results.flatMap(result => result.status === 'fulfilled' ? result.value : [])
+      const failures = results.filter(result => result.status === 'rejected').map((result, index) => `image ${index + 1}: ${result.reason instanceof Error ? result.reason.message : 'analysis failed'}`)
       console.debug('[Aura UI] vision response', { count: analyzed.length, ids: analyzed.map(item => item.id), categories: analyzed.map(item => item.category), sources: analyzed.map(item => item.source ?? 'wardrobe') })
       const persisted = await Promise.all(analyzed.map(item => saveWardrobeItem(item, 'temporary')))
       setWardrobeItems(current => { const next = [...current, ...persisted]; void refreshProductDecision(next); return next })
       setMemoryScope('temporary')
       setWardrobeState(analyzed.length ? 'ready' : 'error')
-      if (!analyzed.length) setWardrobeError('No clothing items were confidently detected in that image.')
+      if (failures.length) setWardrobeError(`${failures.join(' · ')}${analyzed.length ? ' Valid images were kept.' : ''}`)
+      else if (!analyzed.length) setWardrobeError('No clothing items were confidently detected in that image.')
     } catch (error) {
       setWardrobeState('error')
       const message = error instanceof Error ? error.message : ''
@@ -455,11 +458,14 @@ function App() {
     try {
       const saved = await saveStyleProfile(profileDraft)
       setStyleProfile(saved); setProfileDraft(saved); setProfileSaved(true); setProfileOpen(false); setApiError('')
+      setSession(demoSession); setSubmitted(false); setActiveDay('all'); setSelectedProduct(null); setSelectedOutfit(null); setProductDecision(null)
+      setApiError('Profile saved — generate a new plan.')
     } catch { setApiError('Could not save your style profile. Check the FastAPI service.') }
   }
   if (extensionRuntime) return <div className="extension-shell">
     <header className="extension-header"><div className="extension-brand"><span className="brand-mark">a</span><strong>AURA</strong></div><div className="extension-live-data" aria-label="Live service status"><span className={liveStatus.vision ? 'is-live' : ''}>Vision: {liveStatus.vision ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.apify ? 'is-live' : ''}>Apify: {liveStatus.apify ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.cartesia ? 'is-live' : ''}>Cartesia: {liveStatus.cartesia ? 'LIVE' : 'unavailable'}</span><span className={liveStatus.fetch ? 'is-live' : ''}>Fetch: {liveStatus.fetch ? 'LIVE' : 'unavailable'}</span></div><div className="extension-header-actions"><span className="extension-status"><i />{isPlanning ? 'Planning…' : isModifying ? 'Replanning…' : submitted ? 'Plan active' : 'Ready'}</span><button className="extension-reset" onClick={resetDemo}>Reset demo</button><button className="extension-clear-memory" onClick={() => void clearAllWardrobeMemory()} disabled={!wardrobeItems.length}>Clear memory</button></div></header>
     {wardrobeLoadState === 'loaded' && <div className="extension-memory-loaded">✓ Wardrobe memory loaded · structured item data only · photos discarded after analysis · {memoryScope === 'remembered' ? 'remembered until removed' : `temporary until ${memoryExpiryLabel}`}</div>}
+    {import.meta.env.DEV && <div className="extension-dev-identity">dev user: demo_user · session: {session.session}</div>}
     <main className="extension-main">
       <section className="extension-request">
         <span className="eyebrow">PERSONAL SHOPPING AGENT</span>
@@ -476,7 +482,7 @@ function App() {
         {apiError && <div className="extension-wardrobe-error">{apiError}</div>}
         {!input && <div className="extension-suggestions"><button onClick={() => setInput('I need a dinner look for Friday under $150')}>Dinner date</button><button onClick={() => setInput('Build me a capsule wardrobe for fall')}>Fall capsule</button></div>}
       </section>
-      {submitted && <section className="extension-brief"><div><span className="eyebrow">CURRENT BRIEF</span><strong>{tripLabel}</strong><p>{briefDays} days · {briefStyle}{briefBudget}</p><small>{request.outfits || session.outfits.length} looks planned</small></div><span className={session.constraintStatus === 'satisfied' ? 'extension-check' : 'extension-conflict'}>{session.constraintStatus === 'satisfied' ? '✓ Within constraints' : 'Needs review'}</span></section>}
+      {submitted && <section className="extension-brief"><div><span className="eyebrow">CURRENT BRIEF</span><strong>{tripLabel}</strong><p>{briefDays} days · {briefStyle}{briefBudget}</p><small>{request.outfits || session.outfits.length} looks planned · {styleProfile.shopping_fit ? `${styleProfile.shopping_fit} fit` : 'fit not specified'} · {styleProfile.preferred_colors.join(', ') || 'any colors'}</small></div><span className={session.constraintStatus === 'satisfied' ? 'extension-check' : 'extension-conflict'}>{session.constraintStatus === 'satisfied' ? '✓ Within constraints' : 'Needs review'}</span></section>}
       {submitted && session.conflict?.status === 'needs_user_input' && <div className="extension-conflict-card"><span className="eyebrow">AURA NEEDS A CHOICE</span><strong>{session.conflict.message}</strong><div>{session.conflict.options.map((option, index) => <button key={index} onClick={() => resolveConflict(option)}>{typeof option === 'string' ? option : option.label ?? option.message ?? option.value}</button>)}</div></div>}
       {submitted && session.outfits.length === 0 && !session.conflict && <div className="extension-conflict-card"><span className="eyebrow">NO LIVE PLAN</span><strong>No compatible live products were found.</strong><p>Aura did not substitute mock products. Try a broader request or check Apify availability.</p></div>}
       {submitted && <section className="extension-activity"><div className="extension-section-head"><div><span className="eyebrow">AGENT ACTIVITY</span><strong>{session.agentEvents[session.agentEvents.length - 1]?.title || 'Plan ready'}</strong></div><span className="extension-live"><i /> live</span></div><div className="extension-events">{session.agentEvents.slice(-4).map(event => <div className="extension-event" key={event.id}><span className={event.status === 'done' ? 'event-done' : 'event-current'}>{event.status === 'done' ? '✓' : '•'}</span><div><b>{event.agent}</b><span>{event.title}</span><small>{event.detail}</small></div></div>)}</div></section>}

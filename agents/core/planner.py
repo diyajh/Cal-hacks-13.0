@@ -10,7 +10,7 @@ import asyncio
 
 from agents import config
 from agents.core import taxonomy as tx
-from agents.core.contract import make_event, wardrobe_item_active, normalize_category
+from agents.core.contract import make_event, wardrobe_item_active, normalize_category, product_fit_compatible
 from agents.core.explain import why_it_works
 from agents.core.scoring import score_outfit
 from agents.products.client import make_search_request
@@ -45,6 +45,7 @@ def normalize_wardrobe_item(item: dict, index: int = 0) -> dict:
         "tags": item.get("tags") or ([item.get("style")] if item.get("style") else []),
         "source": "wardrobe", "confidence": item.get("confidence"),
         "image_url": item.get("image_url") or item.get("image") or "",
+        "fit": item.get("fit") or "unknown",
     })
     return item
 
@@ -121,6 +122,8 @@ class TripPlanner:
     async def _search(self, search_request: dict, reason: str = "", outfit_id=None) -> list[dict]:
         products, evs = await self.bus.search(self.sid, search_request, reason, outfit_id)
         self.emit(evs)
+        fit = (self.profile or {}).get("shopping_fit")
+        products = [p for p in products if product_fit_compatible(p, fit)]
         for p in products:
             self.pool[p["id"]] = p
         return products
@@ -138,7 +141,8 @@ class TripPlanner:
         tags = [] if broad else (styles[:3] + list(self.request.get("occasions") or [])[:2])
         if max_price is None:
             max_price = self.request.get("per_outfit_budget") or (self.profile or {}).get("default_budget_per_outfit")
-        return make_search_request(f"{word} {query_core}".strip(), category, colors, tags, max_price, 20)
+        return make_search_request(f"{word} {query_core}".strip(), category, colors, tags, max_price, 20,
+                                   (self.profile or {}).get("shopping_fit"))
 
     # ------------------------------------------------------------------ initial plan
     def _init_outfits(self):
@@ -236,6 +240,8 @@ class TripPlanner:
         out = []
         for item in list(self.pool.values()) + self.wardrobe:
             is_w = item in self.wardrobe
+            if not is_w and not product_fit_compatible(item, (self.profile or {}).get("shopping_fit")):
+                continue
             cat = item.get("category")
             if cat != slot or (not is_w and item["id"] in o["excluded"]):
                 continue

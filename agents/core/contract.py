@@ -86,6 +86,21 @@ def normalize_category(value: Any) -> str | None:
     return _CATEGORY_ALIASES.get(value.strip().lower())
 
 
+def product_fit_compatible(product: dict, shopping_fit: str | None) -> bool:
+    """Hard safety filter for explicitly gendered catalog language."""
+    if shopping_fit in (None, "", "unisex", "prefer_not_to_say"):
+        return True
+    text = " ".join(str(product.get(key) or "") for key in ("name", "subcategory", "description", "retailer", "tags")).lower()
+    if shopping_fit == "mens":
+        blocked = ("women's", "womens", "woman", "female", "ladies", "skirt", "dress", "bra", "blouse")
+        return not any(term in text for term in blocked)
+    if shopping_fit == "womens":
+        blocked = ("men's", "mens", " man ", "male", "gentlemen", "boy's", "boys")
+        padded = f" {text} "
+        return not any(term in padded for term in blocked)
+    return True
+
+
 # --------------------------------------------------------------------------- ShoppingRequest
 
 SHOPPING_REQUEST_KEYS = [
@@ -173,6 +188,7 @@ def normalize_product(p: Any) -> dict | None:
         "name": str(p["name"]),
         "category": category,
         "subcategory": p.get("subcategory") or None,
+        "fit": p.get("fit") or None,
         "price": price,
         "currency": p.get("currency") or CURRENCY,
         "retailer": p.get("retailer") or None,

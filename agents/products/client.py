@@ -21,7 +21,7 @@ from functools import lru_cache
 
 from agents import config
 from agents.core import taxonomy as tx
-from agents.core.contract import normalize_product
+from agents.core.contract import normalize_product, product_fit_compatible
 
 log = logging.getLogger("agents.products")
 
@@ -35,9 +35,11 @@ SOURCE_LABELS = {
 
 
 def make_search_request(query: str, category: str | None = None, colors: list[str] | None = None,
-                        tags: list[str] | None = None, max_price: float | None = None, limit: int = 20) -> dict:
+                        tags: list[str] | None = None, max_price: float | None = None, limit: int = 20,
+                        shopping_fit: str | None = None) -> dict:
     return {"query": query, "category": category, "colors": colors or [], "tags": tags or [],
-            "max_price": round(max_price, 2) if max_price is not None else None, "limit": limit}
+            "max_price": round(max_price, 2) if max_price is not None else None, "limit": limit,
+            "shopping_fit": shopping_fit}
 
 
 # --------------------------------------------------------------------------- live service + cache
@@ -109,6 +111,8 @@ def _validate(raw: list, req: dict) -> tuple[list[dict], dict]:
             reject("invalid", item, "live result is not an Apify product")
         elif not p["image_url"] or not p["product_url"] or not p["retailer"]:
             reject("invalid", item, "live product is missing image, URL, or retailer")
+        elif not product_fit_compatible(p, req.get("shopping_fit")):
+            reject("invalid", item, f"incompatible with {req.get('shopping_fit')} fit")
         elif not p["available"]:
             reject("unavailable", item, "available=false")
         elif req.get("max_price") is not None and p["price"] > req["max_price"]:
@@ -182,6 +186,9 @@ BREAKER_SECONDS = 30
 
 
 def search_products(req: dict) -> tuple[list[dict], str, dict]:
+    log.info("product search query=%r fit=%s category=%s max_price=%s colors=%s tags=%s",
+             req.get("query"), req.get("shopping_fit"), req.get("category"), req.get("max_price"),
+             req.get("colors"), req.get("tags"))
     if not config.PRODUCT_SEARCH_URL:
         return _fallback(req, None)
     cached = _cache_get(req)
@@ -202,4 +209,6 @@ def search_products(req: dict) -> tuple[list[dict], str, dict]:
         return [], "none", {"error": str(detail)}
     _cache_put(req, raw)
     products, stats = _validate(raw, req)
+    log.info("product search result source=product_service received=%s kept=%s rejected=%s",
+             stats.get("received"), stats.get("kept"), stats.get("rejected_samples", []))
     return products, "product_service", stats

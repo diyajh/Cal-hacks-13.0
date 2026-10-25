@@ -22,10 +22,12 @@ export interface StyleSession {
   totalCost: number; newPurchaseCost: number; ownedItems: Product[]; reusedItems: Product[]
   agentEvents: AgentEvent[]; constraintStatus: 'satisfied' | 'conflict'; conflict?: SessionConflict
   wardrobeReusedCount?: number; candidateReusedCount?: number; uniquePurchaseCount?: number; purchasesAvoided?: number; wardrobeValueAvoided?: number
+  profileVersion?: string; profileSnapshot?: StyleProfile
 }
 export interface WardrobeItem {
   category: string; subcategory: string; color: string; pattern: string; material: string
   subtype?: string; style: string; formality: string; confidence: number
+  fit?: string
   id?: string; name?: string; image?: string; image_url?: string; source?: 'wardrobe'
   memory_type?: 'temporary' | 'remembered'; expires_at?: string | null
 }

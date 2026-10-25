@@ -14,6 +14,7 @@ Both return a PlanResult dict:
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
 
@@ -58,6 +59,11 @@ def load_session(session_id: str) -> dict | None:
 def _result(rec, wardrobe_new=None, conflict=None, profile_updates=None) -> dict:
     return {"final_recommendation": rec, "wardrobe_items_to_save": wardrobe_new or [],
             "conflict": conflict, "profile_updates": profile_updates}
+
+
+def _profile_version(profile: dict | None) -> str:
+    payload = json.dumps(profile or {}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode()).hexdigest()[:12]
 
 
 def _conflict(remaining: list[dict], request: dict, planner: TripPlanner) -> dict:
@@ -165,12 +171,9 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
     parsed = parse_request(raw_request, session_id, user_id, wardrobe or [])
     request = parsed["request"]
     if profile:
-        if not request.get("styles"):
-            request["styles"] = list(profile.get("preferred_styles") or [])
-        if not request.get("preferred_colors"):
-            request["preferred_colors"] = list(profile.get("preferred_colors") or [])
-        if not request.get("avoid"):
-            request["avoid"] = list(profile.get("avoided_colors") or [])
+        request["styles"] = list(dict.fromkeys((request.get("styles") or []) + list(profile.get("preferred_styles") or [])))
+        request["preferred_colors"] = list(dict.fromkeys((request.get("preferred_colors") or []) + list(profile.get("preferred_colors") or [])))
+        request["avoid"] = list(dict.fromkeys((request.get("avoid") or []) + list(profile.get("avoided_colors") or [])))
     if request.get("per_outfit_budget") is None and profile and profile.get("default_budget_per_outfit") is not None:
         request["per_outfit_budget"] = profile["default_budget_per_outfit"]
         request["hard_constraints"], request["soft_preferences"] = derive_constraint_lists(request, request)
@@ -217,6 +220,8 @@ async def plan_shopping(raw_request: str, user_id: str, session_id: str, profile
 
     conflict = _conflict(remaining, request, planner) if remaining else None
     rec = _finalize(planner, request, events, remaining, session_id, conflict)
+    rec["profile_snapshot"] = copy.deepcopy(profile or {})
+    rec["profile_version"] = _profile_version(profile)
     log.info("plan response session=%s wardrobe_reused=%s candidate_reused=%s purchases=%s", session_id,
              rec.get("wardrobe_reused_count"), rec.get("candidate_reused_count"), rec.get("unique_purchase_count"))
     if not planner.pool and any("live search failed" in e["message"] for e in events):
@@ -355,6 +360,8 @@ async def modify_shopping(modification: dict, profile: dict | None = None, wardr
     conflict = _conflict(remaining, request, planner) if remaining else None
     changed = ", ".join(a.replace("_", " ") for a in sorted(affected)) or "your plan"
     rec = _finalize(planner, request, events, remaining, sid, conflict, intro=f"Updated {changed}.")
+    rec["profile_snapshot"] = copy.deepcopy(profile or {})
+    rec["profile_version"] = _profile_version(profile)
     events.append(make_event(sid, ORCH, "plan_completed" if not remaining else "conflict", rec["message"],
                              "completed" if not remaining else "failed"))
     save_session(sid, {"request": request, "profile": profile, "wardrobe": planner.wardrobe,

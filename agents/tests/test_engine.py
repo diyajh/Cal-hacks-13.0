@@ -25,6 +25,7 @@ REC_KEYS = {"session_id", "status", "parsed_request", "outfits", "total_new_purc
             "owned_items_used", "reused_items", "agent_events", "constraint_violations",
             "all_constraints_satisfied", "message", "wardrobe_reused_count", "unique_purchase_count",
             "purchases_avoided", "outfits_unlocked", "wardrobe_value_avoided", "candidate_reused_count"}
+REC_KEYS.update({"profile_snapshot", "profile_version"})
 OUTFIT_KEYS = {"id", "title", "day", "occasion", "match_score", "score_breakdown", "items", "total_value",
                "new_purchase_cost", "why_it_works", "constraints_satisfied"}
 ITEM_KEYS = {"id", "source_type", "source", "product", "wardrobe_item", "purchase_required", "reused", "used_in_outfits"}
@@ -168,6 +169,17 @@ class TestPlan(unittest.TestCase):
         self.assertIn(("wardrobe", "White shoes"), names)
         self.assertEqual(rec["wardrobe_reused_count"], 2)
         self.assertEqual(rec["unique_purchase_count"], 1)
+
+    def test_profile_constraints_are_merged_and_snapshotted(self):
+        result = run(plan_shopping(
+            "One casual outfit for San Diego under $50", "profile_user", "profile-session",
+            profile={"shopping_fit": "mens", "preferred_styles": ["smart casual"],
+                     "preferred_colors": ["black"], "default_budget_per_outfit": 50},
+        ))
+        rec = result["final_recommendation"]
+        self.assertIn("smart casual", rec["parsed_request"]["styles"])
+        self.assertEqual(rec["profile_snapshot"]["shopping_fit"], "mens")
+        self.assertTrue(rec["profile_version"])
 
     def test_modify_only_target(self):
         before = {o["id"]: [i["id"] for i in o["items"]] for o in self.rec["outfits"]}

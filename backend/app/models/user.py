@@ -29,6 +29,7 @@ class WardrobeItem(BaseModel):
     pattern: Optional[str] = None
     style: Optional[str] = None
     formality: Optional[str] = None
+    fit: Optional[str] = None
     confidence: Optional[float] = None
     image_url: Optional[str] = None
     source: Literal["wardrobe"] = "wardrobe"

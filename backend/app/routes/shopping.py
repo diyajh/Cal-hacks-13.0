@@ -75,6 +75,9 @@ async def plan(req: PlanRequest):
             *request_wardrobe,
         ]
     }
+    log.info("profile received user=%s fit=%s styles=%s colors=%s avoided=%s", req.user_id,
+             payload["profile"].get("shopping_fit"), payload["profile"].get("preferred_styles"),
+             payload["profile"].get("preferred_colors"), payload["profile"].get("avoided_colors"))
 
     try:
         async with httpx.AsyncClient(timeout=120) as client:

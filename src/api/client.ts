@@ -117,6 +117,8 @@ const normalizeSession = (payload: any): StyleSession => {
     purchasesAvoided: Number(recommendation.purchases_avoided ?? 0),
     wardrobeValueAvoided: Number(recommendation.wardrobe_value_avoided ?? 0),
     candidateReusedCount: Number(recommendation.candidate_reused_count ?? 0),
+    profileVersion: recommendation.profile_version,
+    profileSnapshot: recommendation.profile_snapshot,
   }
 }
 

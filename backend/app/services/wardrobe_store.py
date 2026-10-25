@@ -49,6 +49,7 @@ class WardrobeStore:
                     color TEXT,
                     material TEXT,
                     style TEXT,
+                    fit TEXT,
                     confidence REAL,
                     source TEXT NOT NULL DEFAULT 'wardrobe',
                     memory_status TEXT NOT NULL CHECK(memory_status IN ('temporary', 'remembered')),
@@ -59,6 +60,9 @@ class WardrobeStore:
                     updated_at TEXT NOT NULL
                 )
             """)
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(wardrobe_items)").fetchall()}
+            if "fit" not in columns:
+                connection.execute("ALTER TABLE wardrobe_items ADD COLUMN fit TEXT")
             connection.execute("CREATE INDEX IF NOT EXISTS idx_wardrobe_user ON wardrobe_items(user_id)")
             connection.execute("CREATE INDEX IF NOT EXISTS idx_wardrobe_expiry ON wardrobe_items(expires_at)")
             connection.execute("""
@@ -76,7 +80,7 @@ class WardrobeStore:
         return WardrobeItem(
             id=row["item_id"], name=row["name"], category=row["category"],
             subtype=row["subtype"], subcategory=row["subcategory"], color=row["color"],
-            material=row["material"] or "unknown", style=row["style"] or "casual",
+            material=row["material"] or "unknown", style=row["style"] or "casual", fit=row["fit"],
             confidence=row["confidence"], image_url=None, source=row["source"],
             memory_type=row["memory_status"], expires_at=row["expires_at"],
             colors=json.loads(row["colors_json"] or "[]"), tags=json.loads(row["tags_json"] or "[]"),
@@ -105,11 +109,11 @@ class WardrobeStore:
         with self._connect() as connection:
             connection.execute(
                 """INSERT INTO wardrobe_items
-                (user_id, item_id, name, category, subtype, subcategory, color, material, style,
+                (user_id, item_id, name, category, subtype, subcategory, color, material, style, fit,
                  confidence, source, memory_status, colors_json, tags_json, created_at, expires_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (user_id, item_id, item.name, item.category, item.subtype, item.subcategory,
-                 item.color, item.material, item.style, item.confidence, "wardrobe", item.memory_type,
+                 item.color, item.material, item.style, item.fit, item.confidence, "wardrobe", item.memory_type,
                  json.dumps(item.colors), json.dumps(item.tags), now.isoformat(), expiry.isoformat() if expiry else None, now.isoformat()),
             )
         item.id = item_id
@@ -124,10 +128,10 @@ class WardrobeStore:
         with self._connect() as connection:
             result = connection.execute(
                 """UPDATE wardrobe_items SET name=?, category=?, subtype=?, subcategory=?, color=?, material=?,
-                style=?, confidence=?, source='wardrobe', memory_status=?, colors_json=?, tags_json=?,
+                style=?, fit=?, confidence=?, source='wardrobe', memory_status=?, colors_json=?, tags_json=?,
                 expires_at=?, updated_at=? WHERE user_id=? AND item_id=?""",
                 (item.name, item.category, item.subtype, item.subcategory, item.color, item.material,
-                 item.style, item.confidence, item.memory_type, json.dumps(item.colors), json.dumps(item.tags),
+                 item.style, item.fit, item.confidence, item.memory_type, json.dumps(item.colors), json.dumps(item.tags),
                  expiry.isoformat() if expiry else None, now.isoformat(), user_id, item_id),
             )
         if result.rowcount == 0:

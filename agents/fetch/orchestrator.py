@@ -116,7 +116,10 @@ async def health(ctx: Context) -> HealthResponse:
 
 @orchestrator.on_rest_post("/plan", PlanRestRequest, AgentRestResponse)
 async def plan(ctx: Context, req: PlanRestRequest) -> AgentRestResponse:
-    ctx.logger.info(f"plan request for session {req.session_id}")
+    profile = req.profile or {}
+    ctx.logger.info(f"plan request session={req.session_id} user={req.user_id} fit={profile.get('shopping_fit')} "
+                    f"styles={profile.get('preferred_styles')} colors={profile.get('preferred_colors')} "
+                    f"wardrobe_count={len(req.wardrobe)}")
     result = await plan_shopping(req.raw_request, req.user_id, req.session_id, req.profile, req.wardrobe,
                                  bus=FetchBus(ctx))
     return AgentRestResponse(**result)

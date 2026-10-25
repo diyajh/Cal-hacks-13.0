@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from app.models.user import UserProfile, WardrobeItem
 from app.services.wardrobe_store import WardrobeStore, create_store
+import logging
 
 router = APIRouter(prefix="/users")
+log = logging.getLogger("aura.profile")
 
 wardrobe_store: WardrobeStore = create_store()
 
@@ -15,6 +17,8 @@ def configure_wardrobe_store(database_url: str) -> None:
 
 @router.put("/{user_id}/profile")
 def save_profile(user_id: str, profile: UserProfile):
+    log.info("profile saved user=%s fit=%s styles=%s colors=%s avoided=%s", user_id, profile.shopping_fit,
+             profile.preferred_styles, profile.preferred_colors, profile.avoided_colors)
     return wardrobe_store.save_profile(user_id, profile)
 
 

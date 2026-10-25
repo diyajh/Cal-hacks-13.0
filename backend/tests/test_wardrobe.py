@@ -82,8 +82,11 @@ class WardrobeAnalysisTests(unittest.TestCase):
     def test_valid_wardrobe_json_is_normalized(self):
         result = normalize_items(_json_object('{"items":[{"category":"shirt","subcategory":"button-up","color":"beige","confidence":0.91}]}'))
         self.assertEqual(result[0]["category"], "shirt")
+        self.assertTrue(result[0]["id"].startswith("vision_"))
+        self.assertEqual(result[0]["name"], "beige button-up")
         self.assertEqual(result[0]["color"], "beige")
         self.assertEqual(result[0]["confidence"], 0.91)
+        self.assertEqual(result[0]["fit"], "unknown")
 
     def test_footwear_subtype_is_normalized(self):
         result = normalize_items(_json_object('{"items":[{"category":"shoes","subcategory":"unknown","color":"white","style":"sneaker","confidence":0.95}]}'))

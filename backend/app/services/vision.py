@@ -9,6 +9,7 @@ import base64
 import json
 import os
 import re
+import uuid
 from typing import Any
 
 import httpx
@@ -78,15 +79,20 @@ def normalize_items(payload: dict[str, Any]) -> list[dict[str, Any]]:
             confidence = 0.0
         normalized_category = category if category in ALLOWED_CATEGORIES else "other"
         normalized_subtype = _footwear_subtype(raw, normalized_category) if normalized_category in {"shoes", "sneakers", "boots"} else str(raw.get("subcategory") or "unknown").strip().lower()
+        color = str(raw.get("color") or "unknown").strip().lower()
+        name = str(raw.get("name") or " ".join(part for part in (color, normalized_subtype or normalized_category) if part)).strip()
         items.append({
+            "id": str(raw.get("id") or f"vision_{uuid.uuid4().hex[:10]}"),
+            "name": name,
             "category": normalized_category,
             "subcategory": normalized_subtype,
             "subtype": normalized_subtype,
-            "color": str(raw.get("color") or "unknown").strip().lower(),
+            "color": color,
             "pattern": str(raw.get("pattern") or "unknown").strip().lower(),
             "material": str(raw.get("material") or "unknown").strip().lower(),
             "style": str(raw.get("style") or "unknown").strip().lower(),
             "formality": str(raw.get("formality") or "unknown").strip().lower(),
+            "fit": str(raw.get("fit") or "unknown").strip().lower(),
             "confidence": round(confidence, 2),
         })
     return items
@@ -133,7 +139,7 @@ def _openai(image: bytes, content_type: str, model: str) -> str:
 
 
 _PROMPT = """Analyze the wardrobe image and return ONLY this JSON shape:
-{"items":[{"category":"shoes","subcategory":"sneaker","subtype":"sneaker","color":"white","pattern":"solid","material":"unknown","style":"casual","formality":"casual","confidence":0.91}]}
+{"items":[{"category":"shoes","subcategory":"sneaker","subtype":"sneaker","color":"white","pattern":"solid","material":"unknown","style":"casual","formality":"casual","fit":"unisex","confidence":0.91}]}
 Include one item per clearly visible garment/accessory. Do not infer hidden items. Use unknown when uncertain. Confidence is 0 to 1 for visual identification only. No markdown, commentary, prices, URLs, or recommendations."""
 
 
